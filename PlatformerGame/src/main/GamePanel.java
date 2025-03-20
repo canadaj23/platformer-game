@@ -5,17 +5,25 @@ import inputs.MouseInputs;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Random;
 
 /**
  * This class will draw the game elements onto a panel that can then be displayed on a GameWindow object.
  */
 public class GamePanel extends JPanel {
     private MouseInputs mouseInputs;
-    private int xDelta = 100, yDelta = 100;
+    private float xDelta = 100, yDelta = 100;
+    private float xDir = 1.5f, yDir = 1.5f;
+    private Color color = new Color(150, 20, 90);
+    Random random;
 
+    /**
+     * Constructor for GamePanel
+     */
     public GamePanel() {
-        mouseInputs = new MouseInputs(this);
+        random = new Random();
 
+        mouseInputs = new MouseInputs(this);
         addKeyListener(new KeyboardInputs(this));
         addMouseListener(mouseInputs);
         addMouseMotionListener(mouseInputs);
@@ -27,7 +35,6 @@ public class GamePanel extends JPanel {
      */
     public void changeXDelta(int value) {
         this.xDelta += value;
-        repaint();
     }
 
     /**
@@ -36,7 +43,6 @@ public class GamePanel extends JPanel {
      */
     public void changeYDelta(int value) {
         this.yDelta += value;
-        repaint();
     }
 
     /**
@@ -47,7 +53,6 @@ public class GamePanel extends JPanel {
     public void setRectPos(int x, int y) {
         this.xDelta = x;
         this.yDelta = y;
-        repaint();
     }
 
     /**
@@ -56,6 +61,30 @@ public class GamePanel extends JPanel {
      */
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.fillRect(xDelta, yDelta, 200, 50);
+
+        updateRectangle();
+        g.setColor(color);
+        g.fillRect((int) xDelta, (int) yDelta, 200, 50);
+    }
+
+    /**
+     * "Moves" the rectangle without keyboard or mouse inputs around the frame.
+     */
+    private void updateRectangle() {
+        xDelta += xDir;
+        if (xDelta > 400 || xDelta < 0) {
+            xDir = -xDir;
+            color = getRandomColor();
+        }
+
+        yDelta += yDir;
+        if (yDelta > 400 || yDelta < 0) {
+            yDir = -yDir;
+            color = getRandomColor();
+        }
+    }
+
+    private Color getRandomColor() {
+        return new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
     }
 }
