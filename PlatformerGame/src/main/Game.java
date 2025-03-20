@@ -7,8 +7,12 @@ public class Game {
     private GameWindow gameWindow;
     private GamePanel gamePanel;
 
+    /**
+     * Constructor for a Game object
+     */
     public Game() {
         gamePanel = new GamePanel();
         gameWindow = new GameWindow(gamePanel);
+        gamePanel.requestFocus();
     }
 }

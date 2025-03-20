@@ -8,12 +8,17 @@ import javax.swing.*;
 public class GameWindow extends JFrame {
     private JFrame jFrame;
 
+    /**
+     * Constructor for GameWindow
+     * @param gamePanel the gamePanel object to be passed through
+     */
     public GameWindow(GamePanel gamePanel) {
         jFrame = new JFrame();
 
         jFrame.setSize(400, 400);
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jFrame.add(gamePanel);
+        jFrame.setLocationRelativeTo(null);
         jFrame.setVisible(true);
     }
 }
