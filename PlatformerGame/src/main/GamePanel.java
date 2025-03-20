@@ -3,9 +3,12 @@ package main;
 import inputs.KeyboardInputs;
 import inputs.MouseInputs;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.util.Random;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * This class will draw the game elements onto a panel that can then be displayed on a GameWindow object.
@@ -13,20 +16,33 @@ import java.util.Random;
 public class GamePanel extends JPanel {
     private MouseInputs mouseInputs;
     private float xDelta = 100, yDelta = 100;
-    private float xDir = 1.5f, yDir = 1.5f;
-    private Color color = new Color(150, 20, 90);
-    Random random;
+    private BufferedImage image, subImage;
 
     /**
      * Constructor for GamePanel
      */
     public GamePanel() {
-        random = new Random();
+        importImage();
 
+        setPanelSize();
         mouseInputs = new MouseInputs(this);
         addKeyListener(new KeyboardInputs(this));
         addMouseListener(mouseInputs);
         addMouseMotionListener(mouseInputs);
+    }
+
+    private void importImage() {
+        InputStream is = getClass().getResourceAsStream("/player_sprites.png");
+
+        try {
+            image = ImageIO.read(is);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setPanelSize() {
+        setPreferredSize(new Dimension(1280, 800));
     }
 
     /**
@@ -51,8 +67,8 @@ public class GamePanel extends JPanel {
      * @param y the new y-coordinate
      */
     public void setRectPos(int x, int y) {
-        this.xDelta = x;
-        this.yDelta = y;
+        xDelta = x;
+        yDelta = y;
     }
 
     /**
@@ -62,29 +78,7 @@ public class GamePanel extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        updateRectangle();
-        g.setColor(color);
-        g.fillRect((int) xDelta, (int) yDelta, 200, 50);
-    }
-
-    /**
-     * "Moves" the rectangle without keyboard or mouse inputs around the frame.
-     */
-    private void updateRectangle() {
-        xDelta += xDir;
-        if (xDelta > 400 || xDelta < 0) {
-            xDir = -xDir;
-            color = getRandomColor();
-        }
-
-        yDelta += yDir;
-        if (yDelta > 400 || yDelta < 0) {
-            yDir = -yDir;
-            color = getRandomColor();
-        }
-    }
-
-    private Color getRandomColor() {
-        return new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
+        subImage = image.getSubimage(1 * 64, 8 * 40, 64, 40);
+        g.drawImage(subImage, (int) xDelta, (int) yDelta, 128, 80, null);
     }
 }

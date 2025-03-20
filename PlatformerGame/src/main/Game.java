@@ -19,6 +19,9 @@ public class Game implements Runnable {
         startGameLoop();
     }
 
+    /**
+     * Initializes then starts a game loop thread.
+     */
     private void startGameLoop() {
         gameLoopThread = new Thread(this);
         gameLoopThread.start();
