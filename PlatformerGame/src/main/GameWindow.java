@@ -12,7 +12,7 @@ public class GameWindow extends JFrame {
 
     /**
      * Constructor for GameWindow
-     * @param gamePanel the gamePanel object to be passed through
+     * @param gamePanel the gamePanel object used for various purposes
      */
     public GameWindow(GamePanel gamePanel) {
         jFrame = new JFrame();

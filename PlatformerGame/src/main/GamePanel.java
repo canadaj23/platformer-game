@@ -6,6 +6,9 @@ import inputs.MouseInputs;
 import javax.swing.*;
 import java.awt.*;
 
+import static main.Game.GAME_HEIGHT;
+import static main.Game.GAME_WIDTH;
+
 /**
  * This class will draw the game elements onto a panel that can then be displayed on a GameWindow object.
  */
@@ -15,6 +18,7 @@ public class GamePanel extends JPanel {
 
     /**
      * Constructor for GamePanel
+     * @param game the Game object used for various purposes
      */
     public GamePanel(Game game) {
         mouseInputs = new MouseInputs(this);
@@ -30,7 +34,8 @@ public class GamePanel extends JPanel {
      * Sets the size of the panel to be displayed.
      */
     private void setPanelSize() {
-        setPreferredSize(new Dimension(1280, 800));
+        setPreferredSize(new Dimension(GAME_WIDTH, GAME_HEIGHT));
+        System.out.println("Panel Size: " + GAME_WIDTH + " x " + GAME_HEIGHT);
     }
 
     /**

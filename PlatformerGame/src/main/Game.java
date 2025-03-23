@@ -1,6 +1,7 @@
 package main;
 
 import entities.Player;
+import levels.LevelHandler;
 
 import java.awt.*;
 
@@ -13,6 +14,15 @@ public class Game implements Runnable {
     private Thread gameLoopThread;
     private final int FPS_TARGET = 120, UPS_TARGET = 200;
     private Player player;
+    private LevelHandler levelHandler;
+
+    public final static float SCALE = 2f;
+    public final static int DEFAULT_TILES_SIZE = 32;
+    public final static int TILES_WIDTH = 26;
+    public final static int TILES_HEIGHT = 14;
+    public final static int TILES_SIZE = (int) (DEFAULT_TILES_SIZE * SCALE);
+    public final static int GAME_WIDTH = TILES_SIZE * TILES_WIDTH;
+    public final static int GAME_HEIGHT = TILES_SIZE * TILES_HEIGHT;
 
     /**
      * Constructor for a Game object
@@ -40,7 +50,8 @@ public class Game implements Runnable {
      * This could be for a player, enemy, handler, etc.
      */
     private void initClasses() {
-        player = new Player(200, 200);
+        player = new Player(200, 200, (int) (64 * SCALE), (int) (40 * SCALE));
+        levelHandler = new LevelHandler(this);
     }
 
     /**
@@ -48,6 +59,7 @@ public class Game implements Runnable {
      */
     private void update() {
         player.updatePlayer();
+        levelHandler.updateLevel();
     }
 
     /**
@@ -55,6 +67,7 @@ public class Game implements Runnable {
      * @param g the Graphics object used for drawing
      */
     public void render(Graphics g) {
+        levelHandler.drawLevel(g);
         player.renderPlayer(g);
     }
 
@@ -111,7 +124,7 @@ public class Game implements Runnable {
      * Stop moving the player if the game window is not focused.
      */
     public void windowFocusLost() {
-        player.resetDirBooleans();
+        player.resetPlayerDirBooleans();
     }
 
     /**

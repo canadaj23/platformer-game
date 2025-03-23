@@ -1,19 +1,17 @@
 package entities;
 
-import javax.imageio.ImageIO;
+import utils.LoadSave;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.InputStream;
 
-import static utils.Constants.Directions.*;
-import static utils.Constants.Directions.RIGHT;
 import static utils.Constants.PlayerConstants.*;
 
 /**
- * This class inherits any methods and variables from Entity and can be built upon.
+ * This class is for everything related to the player.
  */
 public class Player extends Entity {
+    private int width, height;
     private BufferedImage[][] animations;
     private int animationTick, animationIndex, animationSpeed = 15;
     private int playerAction = IDLE;
@@ -23,21 +21,26 @@ public class Player extends Entity {
 
     /**
      * Constructor for creating a Player object.
-     * @param x the Player object's x-coordinate
-     * @param y the Player object's y-coordinate
+     *
+     * @param x  the Player object's x-coordinate
+     * @param y  the Player object's y-coordinate
+     * @param width
+     * @param height
      */
-    public Player(float x, float y) {
+    public Player(float x, float y, int width, int height) {
         super(x, y);
-        loadAnimations();
+        this.width = width;
+        this.height = height;
+        loadPlayerAnimations();
     }
 
     /**
      * Updates the player's attributes.
      */
     public void updatePlayer() {
-        updatePosition();
-        updateAnimationTick();
-        setAnimation();
+        updatePlayerPosition();
+        updatePlayerAnimationTick();
+        setPlayerAnimation();
     }
 
     /**
@@ -48,15 +51,15 @@ public class Player extends Entity {
                 animations[playerAction][animationIndex],
                 (int) x,
                 (int) y,
-                256,
-                160,
+                width,
+                height,
                 null);
     }
 
     /**
      * Updates the index of the image to be displayed within an animation array.
      */
-    private void updateAnimationTick() {
+    private void updatePlayerAnimationTick() {
         animationTick++;
 
         if (animationTick >= animationSpeed) {
@@ -73,7 +76,7 @@ public class Player extends Entity {
     /**
      * Determines which animation array to use for a given frame.
      */
-    private void setAnimation() {
+    private void setPlayerAnimation() {
         int startAnimation = playerAction;
 
         playerAction = moving ? RUNNING : IDLE;
@@ -83,14 +86,14 @@ public class Player extends Entity {
         }
 
         if (startAnimation != playerAction) {
-            resetAnimationTick();
+            resetPlayerAnimationTick();
         }
     }
 
     /**
      * Resets the animation tick and index for a given sequence.
      */
-    private void resetAnimationTick() {
+    private void resetPlayerAnimationTick() {
         animationTick = 0;
         animationIndex = 0;
     }
@@ -98,7 +101,7 @@ public class Player extends Entity {
     /**
      * Updates the x- and y-coordinates of the player.
      */
-    private void updatePosition() {
+    private void updatePlayerPosition() {
         moving = false;
 
         if (left && !right) {
@@ -121,34 +124,22 @@ public class Player extends Entity {
     /**
      * Creates an animation using multiple still images.
      */
-    private void loadAnimations() {
-        InputStream is = getClass().getResourceAsStream("/player_sprites.png");
+    private void loadPlayerAnimations() {
+        BufferedImage image = LoadSave.GetSpriteCollection(LoadSave.PLAYER_SPRITES);
+        animations = new BufferedImage[9][6];
 
-        try {
-            BufferedImage image = ImageIO.read(is);
-            animations = new BufferedImage[9][6];
-
-            // Assign each animation's subimage to a [j][i]
-            for (int j = 0; j < animations.length; j++) {
+        // Assign each animation's subimage to a [j][i]
+        for (int j = 0; j < animations.length; j++) {
                 for (int i = 0; i < animations[j].length; i++) {
                     animations[j][i] = image.getSubimage(i * 64, j * 40, 64, 40);
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                is.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     /**
      * Resets all four direction booleans.
      */
-    public void resetDirBooleans() {
+    public void resetPlayerDirBooleans() {
         up = false;
         down = false;
         left = false;
@@ -158,14 +149,14 @@ public class Player extends Entity {
     /**
      * @return true/false if player is attacking
      */
-    public boolean isAttacking() {
+    public boolean isPlayerAttacking() {
         return attacking;
     }
 
     /**
      * @param attacking boolean to make player attack or not
      */
-    public void setAttacking(boolean attacking) {
+    public void setPlayerAttacking(boolean attacking) {
         this.attacking = attacking;
     }
 
