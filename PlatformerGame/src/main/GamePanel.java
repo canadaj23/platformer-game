@@ -10,19 +10,27 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static utils.Constants.Directions.*;
+import static utils.Constants.PlayerConstants.*;
+
 /**
  * This class will draw the game elements onto a panel that can then be displayed on a GameWindow object.
  */
 public class GamePanel extends JPanel {
     private MouseInputs mouseInputs;
     private float xDelta = 100, yDelta = 100;
-    private BufferedImage image, subImage;
+    private BufferedImage image;
+    private BufferedImage[][] animations;
+    private int animationTick, animationIndex, animationSpeed = 15;
+    private int playerAction = IDLE, playerDirection = -1;
+    private boolean moving = false;
 
     /**
      * Constructor for GamePanel
      */
     public GamePanel() {
         importImage();
+        loadAnimations();
 
         setPanelSize();
         mouseInputs = new MouseInputs(this);
@@ -31,6 +39,9 @@ public class GamePanel extends JPanel {
         addMouseMotionListener(mouseInputs);
     }
 
+    /**
+     * Makes an image usable within the code.
+     */
     private void importImage() {
         InputStream is = getClass().getResourceAsStream("/player_sprites.png");
 
@@ -38,37 +49,88 @@ public class GamePanel extends JPanel {
             image = ImageIO.read(is);
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
+    /**
+     * Creates an animation using multiple still images.
+     */
+    private void loadAnimations() {
+        animations = new BufferedImage[9][6];
+
+        // Assign each animation's subimage to a [j][i]
+        for (int j = 0; j < animations.length; j++) {
+            for (int i = 0; i < animations[j].length; i++) {
+                animations[j][i] = image.getSubimage(i * 64, j * 40, 64, 40);
+            }
+        }
+    }
+
+    /**
+     * Sets the size of the panel to be displayed.
+     */
     private void setPanelSize() {
         setPreferredSize(new Dimension(1280, 800));
     }
 
     /**
-     * Adds a value to the xDelta (changing x position).
-     * @param value changes value of xDelta
+     * Changes the player's direction based on the parameter.
+     * @param direction the direction the player will face
      */
-    public void changeXDelta(int value) {
-        this.xDelta += value;
+    public void setDirection(int direction) {
+        this.playerDirection = direction;
+        moving = true;
     }
 
     /**
-     * Adds a value to the yDelta (changing y position).
-     * @param value changes value of yDelta
+     * Changes whether the player is moving.
+     * @param moving boolean to indicate if the player is moving
      */
-    public void changeYDelta(int value) {
-        this.yDelta += value;
+    public void setMoving(boolean moving) {
+        this.moving = moving;
     }
 
     /**
-     * Changes the x- and y-coordinates.
-     * @param x the new x-coordinate
-     * @param y the new y-coordinate
+     * Updates the index of the image to be displayed within an animation array.
      */
-    public void setRectPos(int x, int y) {
-        xDelta = x;
-        yDelta = y;
+    private void updateAnimationTick() {
+        animationTick++;
+
+        if (animationTick >= animationSpeed) {
+            animationTick = 0;
+            animationIndex++;
+
+            if (animationIndex >= GetSpriteAmount(playerAction)) {
+                animationIndex = 0;
+            }
+        }
+    }
+
+    /**
+     * Determines which animation array to use for a given frame.
+     */
+    private void setAnimation() {
+        playerAction = moving ? RUNNING : IDLE;
+    }
+
+    /**
+     * Updates the x- and y-coordinates of the player.
+     */
+    private void updatePosition() {
+        if (moving) {
+            switch (playerDirection) {
+                case UP -> yDelta -= 5;
+                case DOWN -> yDelta += 5;
+                case LEFT -> xDelta -= 5;
+                case RIGHT -> xDelta += 5;
+            }
+        }
     }
 
     /**
@@ -78,7 +140,16 @@ public class GamePanel extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        subImage = image.getSubimage(1 * 64, 8 * 40, 64, 40);
-        g.drawImage(subImage, (int) xDelta, (int) yDelta, 128, 80, null);
+        updateAnimationTick();
+        setAnimation();
+        updatePosition();
+
+        g.drawImage(
+                animations[playerAction][animationIndex],
+                (int) xDelta,
+                (int) yDelta,
+                256,
+                160,
+                null);
     }
 }
