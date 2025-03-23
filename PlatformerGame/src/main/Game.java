@@ -1,5 +1,9 @@
 package main;
 
+import entities.Player;
+
+import java.awt.*;
+
 /**
  * This class will take care of most, if not all, of the gameplay.
  */
@@ -8,14 +12,18 @@ public class Game implements Runnable {
     private GamePanel gamePanel;
     private Thread gameLoopThread;
     private final int FPS_TARGET = 120, UPS_TARGET = 200;
+    private Player player;
 
     /**
      * Constructor for a Game object
      */
     public Game() {
-        gamePanel = new GamePanel();
+        initClasses();
+
+        gamePanel = new GamePanel(this);
         gameWindow = new GameWindow(gamePanel);
         gamePanel.requestFocus();
+
         startGameLoop();
     }
 
@@ -28,10 +36,26 @@ public class Game implements Runnable {
     }
 
     /**
+     * Initializes all the classes used for the game.
+     * This could be for a player, enemy, handler, etc.
+     */
+    private void initClasses() {
+        player = new Player(200, 200);
+    }
+
+    /**
      * Updates any game related elements
      */
     private void update() {
-        gamePanel.updateGame();
+        player.updatePlayer();
+    }
+
+    /**
+     * Renders any game element onto the screen.
+     * @param g the Graphics object used for drawing
+     */
+    public void render(Graphics g) {
+        player.renderPlayer(g);
     }
 
     /**
@@ -81,5 +105,20 @@ public class Game implements Runnable {
                 updates = 0;
             }
         }
+    }
+
+    /**
+     * Stop moving the player if the game window is not focused.
+     */
+    public void windowFocusLost() {
+        player.resetDirBooleans();
+    }
+
+    /**
+     * Returns the player object to be used in other classes.
+     * @return the player object
+     */
+    public Player getPlayer() {
+        return player;
     }
 }
