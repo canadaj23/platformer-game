@@ -7,7 +7,7 @@ public class Game implements Runnable {
     private GameWindow gameWindow;
     private GamePanel gamePanel;
     private Thread gameLoopThread;
-    private final int FPS_TARGET = 120;
+    private final int FPS_TARGET = 120, UPS_TARGET = 200;
 
     /**
      * Constructor for a Game object
@@ -28,30 +28,57 @@ public class Game implements Runnable {
     }
 
     /**
+     * Updates any game related elements
+     */
+    private void update() {
+        gamePanel.updateGame();
+    }
+
+    /**
      * Creates a game loop with an FPS counter.
      */
     @Override
     public void run() {
         double timePerFrame = 1_000_000_000.0 / FPS_TARGET;
-        long lastFrame = System.nanoTime();
+        double timePerUpdate = 1_000_000_000.0 / UPS_TARGET;
+        long previousTime = System.nanoTime();
 
         int frames = 0;
+        int updates = 0;
         long lastCheck = System.currentTimeMillis();
 
-        while (true) {
-            long now = System.nanoTime();
+        double deltaU = 0, deltaF = 0;
 
-            if (now - lastFrame >= timePerFrame) {
+        while (true) {
+            long currentTime = System.nanoTime();
+
+            deltaU += (currentTime - previousTime) / timePerUpdate;
+            deltaF += (currentTime - previousTime) / timePerFrame;
+            previousTime = currentTime;
+
+            // Increment number of updates when necessary
+            if (deltaU >= 1) {
+                update();
+                updates++;
+                deltaU--;
+            }
+
+            // Increment number of frames when necessary
+            if (deltaF >= 1) {
                 gamePanel.repaint();
-                lastFrame = now;
                 frames++;
+                deltaF--;
             }
 
             // Determine FPS
             if (System.currentTimeMillis() - lastCheck >= 1000) {
                 lastCheck = System.currentTimeMillis();
+                System.out.println("=======");
                 System.out.println(frames + " FPS");
+                System.out.println(updates + " UPS");
+                System.out.println("=======");
                 frames = 0;
+                updates = 0;
             }
         }
     }

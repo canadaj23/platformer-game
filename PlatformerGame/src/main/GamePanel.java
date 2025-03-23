@@ -134,15 +134,20 @@ public class GamePanel extends JPanel {
     }
 
     /**
+     * Updates logical aspects of the game.
+     */
+    public void updateGame() {
+        updateAnimationTick();
+        setAnimation();
+        updatePosition();
+    }
+
+    /**
      * Paints a display to be added to a frame.
      * @param g the Graphics object
      */
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-
-        updateAnimationTick();
-        setAnimation();
-        updatePosition();
 
         g.drawImage(
                 animations[playerAction][animationIndex],
