@@ -35,12 +35,14 @@ public class HelpMethods {
      * One row of the sprites has a transparent sprite at index 11.
      */
     private static boolean IsSolid(float x, float y, int[][] levelData) {
+        if ((x < 0 || x >= Game.GAME_WIDTH) || (y < 0 || y >= Game.GAME_HEIGHT)) { // top left and bottom right
+            return true;
+        }
+
         float xIndex = x / Game.TILES_SIZE, yIndex = y / Game.TILES_SIZE;
         int value = levelData[(int) yIndex][(int) xIndex];
 
-        return  (x < 0 || x >= Game.GAME_WIDTH) || // top left and bottom right
-                (y < 0 || y >= Game.GAME_HEIGHT) || // top right and bottom left
-                (value != 11);
+        return value != 11;
     }
 
     /**

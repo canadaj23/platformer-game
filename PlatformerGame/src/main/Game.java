@@ -1,7 +1,8 @@
 package main;
 
-import entities.Player;
-import levels.LevelHandler;
+import gamestates.GameState;
+import gamestates.Menu;
+import gamestates.Playing;
 
 import java.awt.*;
 
@@ -13,8 +14,9 @@ public class Game implements Runnable {
     private GamePanel gamePanel;
     private Thread gameLoopThread;
     private final int FPS_TARGET = 120, UPS_TARGET = 200;
-    private Player player;
-    private LevelHandler levelHandler;
+
+    private Menu menu;
+    private Playing playing;
 
     public final static float SCALE = 2f;
     public final static int DEFAULT_TILES_SIZE = 32;
@@ -50,17 +52,22 @@ public class Game implements Runnable {
      * This could be for a player, enemy, handler, etc.
      */
     private void initClasses() {
-        levelHandler = new LevelHandler(this);
-        player = new Player(200, 200, (int) (64 * SCALE), (int) (40 * SCALE));
-        player.loadLevelData(levelHandler.getCurrentLevel().getLevelData());
+        menu = new Menu(this);
+        playing = new Playing(this);
     }
 
     /**
      * Updates any game related elements
      */
     private void update() {
-        player.updatePlayer();
-        levelHandler.updateLevel();
+        switch (GameState.state) {
+            case MENU -> {
+                menu.update();
+            }
+            case PLAYING -> {
+                playing.update();
+            }
+        }
     }
 
     /**
@@ -68,8 +75,14 @@ public class Game implements Runnable {
      * @param g the Graphics object used for drawing
      */
     public void render(Graphics g) {
-        levelHandler.drawLevel(g);
-        player.renderPlayer(g);
+        switch (GameState.state) {
+            case MENU -> {
+                menu.draw(g);
+            }
+            case PLAYING -> {
+                playing.draw(g);
+            }
+        }
     }
 
     /**
@@ -122,17 +135,27 @@ public class Game implements Runnable {
     }
 
     /**
-     * Stop moving the player if the game window is not focused.
+     * Do something if the game window is not focused.
      */
     public void windowFocusLost() {
-        player.resetPlayerDirBooleans();
+        if (GameState.state == GameState.PLAYING) {
+            playing.getPlayer().resetPlayerDirBooleans();
+        }
     }
 
     /**
-     * Returns the player object to be used in other classes.
-     * @return the player object
+     *
+     * @return the Menu object
      */
-    public Player getPlayer() {
-        return player;
+    public Menu getMenu() {
+        return menu;
+    }
+
+    /**
+     *
+     * @return the Playing object
+     */
+    public Playing getPlaying() {
+        return playing;
     }
 }
