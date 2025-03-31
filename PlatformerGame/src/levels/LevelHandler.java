@@ -66,4 +66,13 @@ public class LevelHandler {
     public void updateLevel() {
 
     }
+
+    /**
+     * Returns the current level.
+     * TODO: create more levels
+     * @return the current level
+     */
+    public Level getCurrentLevel() {
+        return levelOne;
+    }
 }

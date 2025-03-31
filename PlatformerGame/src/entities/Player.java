@@ -1,37 +1,39 @@
 package entities;
 
+import main.Game;
 import utils.LoadSave;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 import static utils.Constants.PlayerConstants.*;
+import static utils.HelpMethods.CanMoveHere;
 
 /**
  * This class is for everything related to the player.
  */
 public class Player extends Entity {
-    private int width, height;
     private BufferedImage[][] animations;
     private int animationTick, animationIndex, animationSpeed = 15;
     private int playerAction = IDLE;
     private boolean moving = false, attacking = false;
     private boolean up, down, left, right;
     private float playerSpeed = 2.0f;
+    private int[][] levelData;
+    private float xDrawOffset = 21 * Game.SCALE, yDrawOffset = 4 * Game.SCALE;
 
     /**
      * Constructor for creating a Player object.
      *
      * @param x  the Player object's x-coordinate
      * @param y  the Player object's y-coordinate
-     * @param width
-     * @param height
+     * @param width  the Player object's width
+     * @param height  the Player object's height
      */
     public Player(float x, float y, int width, int height) {
-        super(x, y);
-        this.width = width;
-        this.height = height;
+        super(x, y, width, height);
         loadPlayerAnimations();
+        initHitbox(x, y, 20 * Game.SCALE, 28 * Game.SCALE);
     }
 
     /**
@@ -49,11 +51,12 @@ public class Player extends Entity {
     public void renderPlayer(Graphics g) {
         g.drawImage(
                 animations[playerAction][animationIndex],
-                (int) x,
-                (int) y,
+                (int) (hitbox.x - xDrawOffset),
+                (int) (hitbox.y - yDrawOffset),
                 width,
                 height,
                 null);
+        drawHitbox(g);
     }
 
     /**
@@ -104,19 +107,33 @@ public class Player extends Entity {
     private void updatePlayerPosition() {
         moving = false;
 
+        if (!up && !down && !left && !right) {
+            return;
+        }
+
+        float xSpeed = 0, ySpeed = 0;
+
         if (left && !right) {
-            x -= playerSpeed;
-            moving = true;
+            xSpeed = -playerSpeed;
         } else if (right && !left) {
-            x += playerSpeed;
-            moving = true;
+            xSpeed = playerSpeed;
         }
 
         if (up && !down) {
-            y -= playerSpeed;
-            moving = true;
+            ySpeed = -playerSpeed;
         } else if (down && !up) {
-            y += playerSpeed;
+            ySpeed = playerSpeed;
+        }
+
+//        if (CanMoveHere(x + xSpeed, y + ySpeed, width, height, levelData)) {
+//            this.x += xSpeed;
+//            this.y += ySpeed;
+//            moving = true;
+//        }
+
+        if (CanMoveHere(hitbox.x + xSpeed, hitbox.y + ySpeed, hitbox.width, hitbox.height, levelData)) {
+            hitbox.x += xSpeed;
+            hitbox.y += ySpeed;
             moving = true;
         }
     }
@@ -134,6 +151,15 @@ public class Player extends Entity {
                     animations[j][i] = image.getSubimage(i * 64, j * 40, 64, 40);
                 }
             }
+    }
+
+    /**
+     * Takes the level data and stores it in the Player object.
+     * TODO: possibly implement better way of getting level data
+     * @param levelData the level data to be used with player actions
+     */
+    public void loadLevelData(int[][] levelData) {
+        this.levelData = levelData;
     }
 
     /**
