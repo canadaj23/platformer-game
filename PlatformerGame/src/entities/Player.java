@@ -7,20 +7,26 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 import static utils.Constants.PlayerConstants.*;
-import static utils.HelpMethods.CanMoveHere;
+import static utils.HelpMethods.*;
 
 /**
  * This class is for everything related to the player.
  */
 public class Player extends Entity {
     private BufferedImage[][] animations;
-    private int animationTick, animationIndex, animationSpeed = 15;
+    private int animationTick, animationIndex, animationSpeed = (int) (15 * Game.SCALE);
     private int playerAction = IDLE;
     private boolean moving = false, attacking = false;
-    private boolean up, down, left, right;
-    private float playerSpeed = 2.0f;
+    private boolean up, down, left, right, jump;
+    private float playerSpeed = 1.2f * Game.SCALE;
     private int[][] levelData;
     private float xDrawOffset = 21 * Game.SCALE, yDrawOffset = 4 * Game.SCALE;
+
+    // Jumping and gravity
+    private float airSpeed = 0f, gravity = 0.04f * Game.SCALE;
+    private float jumpSpeed = -2.5f * Game.SCALE;
+    private float fallSpeedAfterCollision = 0.5f * Game.SCALE;
+    private boolean inAir = true;
 
     /**
      * Constructor for creating a Player object.
@@ -84,6 +90,10 @@ public class Player extends Entity {
 
         playerAction = moving ? RUNNING : IDLE;
 
+        if (inAir) {
+            playerAction = airSpeed < 0 ? JUMPING : FALLING;
+        }
+
         if (attacking) {
             playerAction = ATTACK_1;
         }
@@ -107,35 +117,80 @@ public class Player extends Entity {
     private void updatePlayerPosition() {
         moving = false;
 
-        if (!up && !down && !left && !right) {
+        if (jump) {
+            playerJump();
+        }
+
+        if (!left && !right && !inAir) {
             return;
         }
 
-        float xSpeed = 0, ySpeed = 0;
+        float xSpeed = 0;
 
-        if (left && !right) {
-            xSpeed = -playerSpeed;
-        } else if (right && !left) {
-            xSpeed = playerSpeed;
+        if (left) {
+            xSpeed -= playerSpeed;
+        }
+        if (right) {
+            xSpeed += playerSpeed;
         }
 
-        if (up && !down) {
-            ySpeed = -playerSpeed;
-        } else if (down && !up) {
-            ySpeed = playerSpeed;
+        if (!inAir) {
+            if (!IsEntityOnFloor(hitbox, levelData)) {
+                inAir = true;
+            }
         }
 
-//        if (CanMoveHere(x + xSpeed, y + ySpeed, width, height, levelData)) {
-//            this.x += xSpeed;
-//            this.y += ySpeed;
-//            moving = true;
-//        }
+        if (inAir) { // jumping or falling
+            if (CanMoveHere(hitbox.x, hitbox.y  + airSpeed, hitbox.width, hitbox.height, levelData)) {
+                hitbox.y += airSpeed;
+                airSpeed += gravity;
+                updateXPosition(xSpeed);
+            } else {
+                hitbox.y = GetYDistanceToCeiling(hitbox, airSpeed);
+                if (airSpeed > 0) { // touching a floor
+                    resetInAir();
+                } else { // touching a roof
+                    airSpeed = fallSpeedAfterCollision;
+                }
+                updateXPosition(xSpeed);
+            }
+        } else { // on a floor
+            updateXPosition(xSpeed);
+        }
 
-        if (CanMoveHere(hitbox.x + xSpeed, hitbox.y + ySpeed, hitbox.width, hitbox.height, levelData)) {
+        // Allow moving once done with falling or jumping
+        moving = true;
+    }
+
+    /**
+     * Updates the player's speed when going left or right.
+     * @param xSpeed the speed of the character going left or right
+     */
+    private void updateXPosition(float xSpeed) {
+        if (CanMoveHere(hitbox.x + xSpeed, hitbox.y, hitbox.width, hitbox.height, levelData)) {
             hitbox.x += xSpeed;
-            hitbox.y += ySpeed;
-            moving = true;
+        } else {
+            hitbox.x = GetXDistanceToWall(hitbox, xSpeed);
         }
+    }
+
+    /**
+     * Resets air related variables when touching a floor.
+     */
+    private void resetInAir() {
+        inAir = false;
+        airSpeed = 0;
+    }
+
+    /**
+     * (Dis)allows the player to jump.
+     */
+    private void playerJump() {
+        if (inAir) {
+            return;
+        }
+        inAir = true;
+        airSpeed = jumpSpeed;
     }
 
     /**
@@ -160,6 +215,9 @@ public class Player extends Entity {
      */
     public void loadLevelData(int[][] levelData) {
         this.levelData = levelData;
+        if (!IsEntityOnFloor(hitbox, levelData)) {
+            inAir = true;
+        }
     }
 
     /**
@@ -244,5 +302,9 @@ public class Player extends Entity {
      */
     public void setRight(boolean right) {
         this.right = right;
+    }
+
+    public void setJump(boolean jump) {
+        this.jump = jump;
     }
 }
