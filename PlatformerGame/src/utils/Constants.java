@@ -1,6 +1,17 @@
 package utils;
 
+import main.Game;
+
 public class Constants {
+
+    public static class UI {
+        public static class buttons {
+            public static final int DEFAULT_B_WIDTH = 140;
+            public static final int DEFAULT_B_HEIGHT = 56;
+            public static final int B_WIDTH = (int) (DEFAULT_B_WIDTH * Game.SCALE);
+            public static final int B_HEIGHT = (int) (DEFAULT_B_HEIGHT * Game.SCALE);
+        }
+    }
 
     /**
      * This class holds everything related to directions.

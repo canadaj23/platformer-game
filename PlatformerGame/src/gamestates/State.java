@@ -1,6 +1,9 @@
 package gamestates;
 
 import main.Game;
+import ui.MenuButton;
+
+import java.awt.event.MouseEvent;
 
 public class State {
     protected Game game;
@@ -11,6 +14,16 @@ public class State {
      */
     public State(Game game) {
         this.game = game;
+    }
+
+    /**
+     * Determines if the mouse is on the button.
+     * @param e the mouse event (hovering over button)
+     * @param menuButton the menuButton in question
+     * @return whether the mouse is within the button's hitbox
+     */
+    public boolean isOnButton(MouseEvent e, MenuButton menuButton) {
+        return menuButton.getButtonBoundary().contains(e.getX(), e.getY());
     }
 
     /**

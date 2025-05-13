@@ -1,15 +1,21 @@
 package gamestates;
 
 import main.Game;
+import ui.MenuButton;
+import utils.LoadSave;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 
 /**
  * This class holds all the code needed for while in the menu state.
  */
 public class Menu extends State implements StateMethods {
+    private MenuButton[] menuButtons = new MenuButton[3];
+    private BufferedImage backgroundImage;
+    private int menuX, menuY, menuWidth, menuHeight;
 
     /**
      * Constructor for a Menu object that will store a Game object.
@@ -18,17 +24,71 @@ public class Menu extends State implements StateMethods {
      */
     public Menu(Game game) {
         super(game);
+
+        loadMenuButtons();
+        loadBackground();
+    }
+
+    /**
+     * Loads all menu buttons to be interacted with.
+     */
+    private void loadMenuButtons() {
+        // play button
+        menuButtons[0] = new MenuButton(
+                Game.GAME_WIDTH / 2,
+                (int) (150 * Game.SCALE),
+                0,
+                GameState.PLAYING);
+
+        // options button
+        menuButtons[1] = new MenuButton(
+                Game.GAME_WIDTH / 2,
+                (int) (220 * Game.SCALE),
+                1,
+                GameState.OPTIONS);
+
+        // quit button
+        menuButtons[2] = new MenuButton(
+                Game.GAME_WIDTH / 2,
+                (int) (290 * Game.SCALE),
+                2,
+                GameState.QUIT);
+    }
+
+    /**
+     * Loads a menu background so it's not surrounded by just white.
+     */
+    private void loadBackground() {
+        backgroundImage = LoadSave.GetSpriteCollection(LoadSave.MENU_BACKGROUND);
+        menuWidth = (int) (backgroundImage.getWidth() * Game.SCALE);
+        menuHeight = (int) (backgroundImage.getHeight() * Game.SCALE);
+        menuX = (Game.GAME_WIDTH / 2) - (menuWidth / 2);
+        menuY = (int) (45 * Game.SCALE);
     }
 
     @Override
     public void update() {
-
+        for (MenuButton menuButton : menuButtons) {
+            menuButton.update();
+        }
     }
 
     @Override
     public void draw(Graphics g) {
-        g.setColor(Color.BLACK);
-        g.drawString("MENU", Game.GAME_WIDTH / 2, 200);
+        g.drawImage(backgroundImage, menuX, menuY, menuWidth, menuHeight, null);
+
+        for (MenuButton menuButton : menuButtons) {
+            menuButton.draw(g);
+        }
+    }
+
+    /**
+     * Resets each menu button.
+     */
+    private void resetButtons() {
+        for (MenuButton menuButton : menuButtons) {
+            menuButton.resetBools();
+        }
     }
 
     @Override
@@ -38,17 +98,39 @@ public class Menu extends State implements StateMethods {
 
     @Override
     public void mousePressed(MouseEvent e) {
-
+        for (MenuButton menuButton : menuButtons) {
+            if (isOnButton(e, menuButton)) {
+                menuButton.setMousePressed(true);
+                break;
+            }
+        }
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-
+        for (MenuButton menuButton : menuButtons) {
+            if (isOnButton(e, menuButton)) {
+                if (menuButton.isMousePressed()) {
+                    menuButton.changeGameState();
+                }
+                break;
+            }
+        }
+        resetButtons();
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
+        for (MenuButton menuButton : menuButtons) {
+            menuButton.setMouseOver(false);
+        }
 
+        for (MenuButton menuButton : menuButtons) {
+            if (isOnButton(e, menuButton)) {
+                menuButton.setMouseOver(true);
+                break;
+            }
+        }
     }
 
     @Override
