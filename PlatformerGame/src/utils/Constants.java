@@ -5,11 +5,16 @@ import main.Game;
 public class Constants {
 
     public static class UI {
-        public static class buttons {
-            public static final int DEFAULT_B_WIDTH = 140;
-            public static final int DEFAULT_B_HEIGHT = 56;
-            public static final int B_WIDTH = (int) (DEFAULT_B_WIDTH * Game.SCALE);
-            public static final int B_HEIGHT = (int) (DEFAULT_B_HEIGHT * Game.SCALE);
+        public static class MenuButtons {
+            public static final int DEFAULT_MENU_B_WIDTH = 140;
+            public static final int DEFAULT_MENU_B_HEIGHT = 56;
+            public static final int MENU_B_WIDTH = (int) (DEFAULT_MENU_B_WIDTH * Game.SCALE);
+            public static final int MENU_B_HEIGHT = (int) (DEFAULT_MENU_B_HEIGHT * Game.SCALE);
+        }
+
+        public static class PauseButtons {
+            public static final int DEFAULT_SOUND_B_SIZE = 42;
+            public static final int SOUND_B_SIZE = (int) (DEFAULT_SOUND_B_SIZE * Game.SCALE);
         }
     }
 

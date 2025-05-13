@@ -6,11 +6,11 @@ import utils.LoadSave;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-import static utils.Constants.UI.buttons.*;
+import static utils.Constants.UI.MenuButtons.*;
 
 public class MenuButton {
     private int xPos, yPos, rowIndex, index;
-    private int xOffsetCenter = B_WIDTH / 2;
+    private int xOffsetCenter = MENU_B_WIDTH / 2;
     private GameState state;
     private BufferedImage[] images;
     private boolean mouseOver, mousePressed;
@@ -43,10 +43,10 @@ public class MenuButton {
 
         for (int i = 0; i < images.length; i++) {
             images[i] = temp.getSubimage(
-                    i * DEFAULT_B_WIDTH,
-                    rowIndex * DEFAULT_B_HEIGHT,
-                    DEFAULT_B_WIDTH,
-                    DEFAULT_B_HEIGHT);
+                    i * DEFAULT_MENU_B_WIDTH,
+                    rowIndex * DEFAULT_MENU_B_HEIGHT,
+                    DEFAULT_MENU_B_WIDTH,
+                    DEFAULT_MENU_B_HEIGHT);
         }
     }
 
@@ -54,7 +54,7 @@ public class MenuButton {
      * Creates a hitbox for a menu button.
      */
     private void initBoundary() {
-        buttonBoundary = new Rectangle(xPos - xOffsetCenter, yPos, B_WIDTH, B_HEIGHT);
+        buttonBoundary = new Rectangle(xPos - xOffsetCenter, yPos, MENU_B_WIDTH, MENU_B_HEIGHT);
     }
 
     /**
@@ -62,7 +62,7 @@ public class MenuButton {
      * @param g the Graphics object used for drawing
      */
     public void draw(Graphics g) {
-        g.drawImage(images[index], xPos - xOffsetCenter, yPos, B_WIDTH, B_HEIGHT, null);
+        g.drawImage(images[index], xPos - xOffsetCenter, yPos, MENU_B_WIDTH, MENU_B_HEIGHT, null);
     }
 
     /**

@@ -3,6 +3,7 @@ package gamestates;
 import entities.Player;
 import levels.LevelHandler;
 import main.Game;
+import ui.PauseOverlay;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -14,6 +15,8 @@ import java.awt.event.MouseEvent;
 public class Playing extends State implements StateMethods {
     private Player player;
     private LevelHandler levelHandler;
+    private PauseOverlay pauseOverlay;
+    private boolean paused = true;
 
     /**
      * Constructor for a Playing object that will store a Game object.
@@ -26,13 +29,14 @@ public class Playing extends State implements StateMethods {
     }
 
     /**
-     * Initializes all the classes used for the game.
+     * Initializes all the classes used for the playing state of the game.
      * This could be for a player, enemy, handler, etc.
      */
     private void initClasses() {
         levelHandler = new LevelHandler(game);
         player = new Player(200, 200, (int) (64 * Game.SCALE), (int) (40 * Game.SCALE));
         player.loadLevelData(levelHandler.getCurrentLevel().getLevelData());
+        pauseOverlay = new PauseOverlay();
     }
 
     /**
@@ -42,6 +46,7 @@ public class Playing extends State implements StateMethods {
     public void update() {
         levelHandler.updateLevel();
         player.updatePlayer();
+        pauseOverlay.update();
     }
 
     /**
@@ -52,6 +57,7 @@ public class Playing extends State implements StateMethods {
     public void draw(Graphics g) {
         levelHandler.drawLevel(g);
         player.renderPlayer(g);
+        pauseOverlay.draw(g);
     }
 
     @Override
@@ -63,17 +69,23 @@ public class Playing extends State implements StateMethods {
 
     @Override
     public void mousePressed(MouseEvent e) {
-
+        if (paused) {
+            pauseOverlay.mousePressed(e);
+        }
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-
+        if (paused) {
+            pauseOverlay.mouseReleased(e);
+        }
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
-
+        if (paused) {
+            pauseOverlay.mouseMoved(e);
+        }
     }
 
     @Override

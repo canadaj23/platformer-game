@@ -17,6 +17,8 @@ public class LoadSave {
     public static final String LEVEL_ONE_DATA = "level_one_data";
     public static final String MENU_BUTTONS = "menu_buttons";
     public static final String MENU_BACKGROUND = "menu_background";
+    public static final String PAUSE_BACKGROUND = "pause_background";
+    public static final String SOUND_BUTTONS = "sound_buttons";
 
     /**
      * @return a BufferedImage object of all the sprites of a given collection.
