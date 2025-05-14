@@ -16,7 +16,7 @@ public class Playing extends State implements StateMethods {
     private Player player;
     private LevelHandler levelHandler;
     private PauseOverlay pauseOverlay;
-    private boolean paused = true;
+    private boolean paused = false;
 
     /**
      * Constructor for a Playing object that will store a Game object.
@@ -36,7 +36,7 @@ public class Playing extends State implements StateMethods {
         levelHandler = new LevelHandler(game);
         player = new Player(200, 200, (int) (64 * Game.SCALE), (int) (40 * Game.SCALE));
         player.loadLevelData(levelHandler.getCurrentLevel().getLevelData());
-        pauseOverlay = new PauseOverlay();
+        pauseOverlay = new PauseOverlay(this);
     }
 
     /**
@@ -44,9 +44,12 @@ public class Playing extends State implements StateMethods {
      */
     @Override
     public void update() {
-        levelHandler.updateLevel();
-        player.updatePlayer();
-        pauseOverlay.update();
+        if (!paused) {
+            levelHandler.updateLevel();
+            player.updatePlayer();
+        } else {
+            pauseOverlay.update();
+        }
     }
 
     /**
@@ -57,7 +60,15 @@ public class Playing extends State implements StateMethods {
     public void draw(Graphics g) {
         levelHandler.drawLevel(g);
         player.renderPlayer(g);
-        pauseOverlay.draw(g);
+        if (paused) {
+            pauseOverlay.draw(g);
+        }
+    }
+
+    public void mouseDragged(MouseEvent e) {
+        if (paused) {
+            pauseOverlay.mouseDragged(e);
+        }
     }
 
     @Override
@@ -94,7 +105,7 @@ public class Playing extends State implements StateMethods {
             case KeyEvent.VK_A -> player.setLeft(true);
             case KeyEvent.VK_D -> player.setRight(true);
             case KeyEvent.VK_SPACE -> player.setJump(true);
-            case KeyEvent.VK_BACK_SPACE -> GameState.state = GameState.MENU;
+            case KeyEvent.VK_ESCAPE -> paused = !paused;
         }
     }
 
@@ -105,6 +116,13 @@ public class Playing extends State implements StateMethods {
             case KeyEvent.VK_D -> player.setRight(false);
             case KeyEvent.VK_SPACE -> player.setJump(false);
         }
+    }
+
+    /**
+     * Resumes the game.
+     */
+    public void resumeGame() {
+        paused = false;
     }
 
     /**
