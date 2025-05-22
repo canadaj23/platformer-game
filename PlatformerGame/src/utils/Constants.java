@@ -4,6 +4,44 @@ import main.Game;
 
 public class Constants {
 
+    public static class EnemyConstants {
+        // Enemy type
+        public static final int MAN_CRAB = 0;
+
+        // Enemy state
+        public static final int IDLE = 0;
+        public static final int RUNNING = 1;
+        public static final int ATTACK = 2;
+        public static final int HIT = 3;
+        public static final int DEAD = 4;
+
+        // MAN-CRAB dimensions
+        public static final int DEFAULT_MAN_CRAB_WIDTH = 72;
+        public static final int DEFAULT_MAN_CRAB_HEIGHT = 32;
+
+        public static final int MAN_CRAB_WIDTH = (int) (DEFAULT_MAN_CRAB_WIDTH * Game.SCALE);
+        public static final int MAN_CRAB_HEIGHT = (int) (DEFAULT_MAN_CRAB_HEIGHT * Game.SCALE);
+
+        public static final int MAN_CRAB_OFFSET_X = (int) (26 * Game.SCALE);
+        public static final int MAN_CRAB_OFFSET_Y = (int) (9 * Game.SCALE);
+
+        public static int GetEnemySpriteAmount(int enemy_type, int enemy_state) {
+            switch (enemy_type) {
+                case MAN_CRAB -> {
+                    switch (enemy_state) {
+                        case IDLE -> {return 9;}
+                        case RUNNING -> {return 6;}
+                        case ATTACK -> {return 7;}
+                        case HIT -> {return 4;}
+                        case DEAD -> {return 5;}
+                    }
+                }
+            }
+
+            return 0;
+        }
+    }
+
     public static class Environment {
         public static final int DEFAULT_BIG_CLOUD_WIDTH = 448;
         public static final int DEFAULT_BIG_CLOUD_HEIGHT = 101;

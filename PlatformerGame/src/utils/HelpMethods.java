@@ -75,10 +75,10 @@ public class HelpMethods {
      * @param airSpeed Entity object's speed in the air
      * @return distance from an Entity object's hitbox to a roof/floor
      */
-    public static float GetYDistanceToCeiling(Rectangle2D.Float hitbox, float airSpeed) {
+    public static float GetYDistanceToCeilingOrFloor(Rectangle2D.Float hitbox, float airSpeed) {
         int currentTile = (int) (hitbox.y / Game.SIZE_IN_TILES);
 
-        if (airSpeed > 0) { // falling (touching a floor)
+        if (airSpeed > 0) { // falling (touching the floor)
             int tileYPosition = currentTile * Game.SIZE_IN_TILES;
             int yOffset = (int) (Game.SIZE_IN_TILES - hitbox.height);
 
@@ -98,5 +98,16 @@ public class HelpMethods {
         // Check the pixel below bottom left and bottom right corners
         return  IsSolid(hitbox.x, hitbox.y + hitbox.height + 1, levelData) &&
                 IsSolid(hitbox.x + hitbox.width, hitbox.y + hitbox.height + 1, levelData);
+    }
+
+    /**
+     * Returns whether the tile the entity is on is the floor.
+     * @param hitbox        the entity's hitbox
+     * @param xSpeed        the entity's horizontal speed
+     * @param levelData     the level data
+     * @return whether the tile the entity is on is the floor
+     */
+    public static boolean IsFloorTile(Rectangle2D.Float hitbox, float xSpeed, int[][] levelData) {
+        return IsSolid(hitbox.x + xSpeed, hitbox.y + hitbox.height + 1, levelData);
     }
 }

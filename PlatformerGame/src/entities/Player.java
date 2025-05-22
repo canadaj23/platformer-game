@@ -154,7 +154,7 @@ public class Player extends Entity {
                 airSpeed += gravity;
                 updateXPosition(xSpeed);
             } else {
-                hitbox.y = GetYDistanceToCeiling(hitbox, airSpeed);
+                hitbox.y = GetYDistanceToCeilingOrFloor(hitbox, airSpeed);
                 if (airSpeed > 0) { // touching a floor
                     resetInAir();
                 } else { // touching a roof
