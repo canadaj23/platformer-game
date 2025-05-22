@@ -53,16 +53,20 @@ public class Player extends Entity {
 
     /**
      * Renders the player to be seen and interacted with.
+     *
+     * @param g            the Graphics object used for drawing
+     * @param levelOffset  the offset of the player and the left/right border
      */
-    public void renderPlayer(Graphics g) {
+    public void renderPlayer(Graphics g, int levelOffset) {
         g.drawImage(
                 animations[playerAction][animationIndex],
-                (int) (hitbox.x - xDrawOffset),
+                (int) (hitbox.x - xDrawOffset) - levelOffset,
                 (int) (hitbox.y - yDrawOffset),
                 width,
                 height,
                 null);
-        drawHitbox(g);
+        // For debugging
+        drawHitbox(g, levelOffset);
     }
 
     /**
@@ -117,12 +121,16 @@ public class Player extends Entity {
     private void updatePlayerPosition() {
         moving = false;
 
+        // Perform a jump if allowed
         if (jump) {
             playerJump();
         }
 
-        if (!left && !right && !inAir) {
-            return;
+        // Idle animation for remaining still on the ground
+        if (!inAir) {
+            if ((!left && !right) || (left && right)) {
+                return;
+            }
         }
 
         float xSpeed = 0;

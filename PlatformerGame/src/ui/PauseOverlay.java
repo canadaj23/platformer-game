@@ -48,7 +48,7 @@ public class PauseOverlay {
      * Generates the background that surrounds the pause screen buttons.
      */
     private void loadPauseBackground() {
-        pauseBackgroundImage = LoadSave.GetSpriteCollection(LoadSave.PAUSE_BACKGROUND);
+        pauseBackgroundImage = LoadSave.GetSpriteCollection(LoadSave.PAUSE_OVERLAY);
         pauseWidth = (int) (pauseBackgroundImage.getWidth() * Game.SCALE);
         pauseHeight = (int) (pauseBackgroundImage.getHeight() * Game.SCALE);
         pauseX = (Game.GAME_WIDTH / 2) - (pauseWidth / 2);

@@ -43,18 +43,20 @@ public class LevelHandler {
 
     /**
      * Draws the current level of the game.
-     * @param g the Graphics object used for drawing
+     *
+     * @param g            the Graphics object used for drawing
+     * @param levelOffset  the offset of the player and the left/right border
      */
-    public void drawLevel(Graphics g) {
-        for (int j = 0; j < Game.TILES_HEIGHT; j++) {
-            for (int i = 0; i < Game.TILES_WIDTH; i++) {
+    public void drawLevel(Graphics g, int levelOffset) {
+        for (int j = 0; j < Game.HEIGHT_IN_TILES; j++) {
+            for (int i = 0; i < levelOne.getLevelData()[0].length; i++) {
                 int index = levelOne.getSpriteIndex(i, j);
                 g.drawImage(
                         levelSprites[index],
-                        i * Game.TILES_SIZE,
-                        j * Game.TILES_SIZE,
-                        Game.TILES_SIZE,
-                        Game.TILES_SIZE,
+                        (i * Game.SIZE_IN_TILES) - levelOffset,
+                        j * Game.SIZE_IN_TILES,
+                        Game.SIZE_IN_TILES,
+                        Game.SIZE_IN_TILES,
                         null);
             }
         }

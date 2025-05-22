@@ -36,9 +36,9 @@ public abstract class Entity {
      * Draws the Entity object's hitbox for debugging.
      * @param g the Graphics object used for drawing
      */
-    protected void drawHitbox(Graphics g) {
+    protected void drawHitbox(Graphics g, int levelOffset) {
         g.setColor(Color.PINK);
-        g.drawRect((int) hitbox.x, (int) hitbox.y, (int) hitbox.width, (int) hitbox.height);
+        g.drawRect((int) hitbox.x - levelOffset, (int) hitbox.y, (int) hitbox.width, (int) hitbox.height);
     }
 
 //    /**

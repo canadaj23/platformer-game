@@ -35,11 +35,15 @@ public class HelpMethods {
      * One row of the sprites has a transparent sprite at index 11.
      */
     private static boolean IsSolid(float x, float y, int[][] levelData) {
-        if ((x < 0 || x >= Game.GAME_WIDTH) || (y < 0 || y >= Game.GAME_HEIGHT)) { // top left and bottom right
+        // Actual width of the level
+        int maxWidth = levelData[0].length * Game.SIZE_IN_TILES;
+
+        // Top left and bottom right of tile
+        if ((x < 0 || x >= maxWidth) || (y < 0 || y >= Game.GAME_HEIGHT)) {
             return true;
         }
 
-        float xIndex = x / Game.TILES_SIZE, yIndex = y / Game.TILES_SIZE;
+        float xIndex = x / Game.SIZE_IN_TILES, yIndex = y / Game.SIZE_IN_TILES;
         int value = levelData[(int) yIndex][(int) xIndex];
 
         return value != 11;
@@ -52,16 +56,16 @@ public class HelpMethods {
      * @return x distance from Entity object's hitbox to a wall
      */
     public static float GetXDistanceToWall(Rectangle2D.Float hitbox, float xSpeed) {
-        int currentTile = (int) (hitbox.x / Game.TILES_SIZE);
+        int currentTile = (int) (hitbox.x / Game.SIZE_IN_TILES);
 
         if (xSpeed > 0) { // moving right
-            int tileXPosition = currentTile * Game.TILES_SIZE;
-            int xOffset = (int) (Game.TILES_SIZE - hitbox.width);
+            int tileXPosition = currentTile * Game.SIZE_IN_TILES;
+            int xOffset = (int) (Game.SIZE_IN_TILES - hitbox.width);
 
             return tileXPosition + xOffset - 1;
 
         } else { // moving left
-            return currentTile * Game.TILES_SIZE;
+            return currentTile * Game.SIZE_IN_TILES;
         }
     }
 
@@ -72,15 +76,15 @@ public class HelpMethods {
      * @return distance from an Entity object's hitbox to a roof/floor
      */
     public static float GetYDistanceToCeiling(Rectangle2D.Float hitbox, float airSpeed) {
-        int currentTile = (int) (hitbox.y / Game.TILES_SIZE);
+        int currentTile = (int) (hitbox.y / Game.SIZE_IN_TILES);
 
         if (airSpeed > 0) { // falling (touching a floor)
-            int tileYPosition = currentTile * Game.TILES_SIZE;
-            int yOffset = (int) (Game.TILES_SIZE - hitbox.height);
+            int tileYPosition = currentTile * Game.SIZE_IN_TILES;
+            int yOffset = (int) (Game.SIZE_IN_TILES - hitbox.height);
 
             return tileYPosition + yOffset - 1;
         } else { // jumping (touching a roof)
-            return currentTile * Game.TILES_SIZE;
+            return currentTile * Game.SIZE_IN_TILES;
         }
     }
 

@@ -4,6 +4,7 @@ import entities.Player;
 import levels.LevelHandler;
 import main.Game;
 import ui.PauseOverlay;
+import utils.LoadSave;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -17,6 +18,13 @@ public class Playing extends State implements StateMethods {
     private LevelHandler levelHandler;
     private PauseOverlay pauseOverlay;
     private boolean paused = false;
+
+    private int xLevelOffset;
+    private int leftBorder = (int) (0.2 * Game.GAME_WIDTH);
+    private int rightBorder = (int) (0.8 * Game.GAME_WIDTH);
+    private int levelTilesWide = LoadSave.GetLevelData()[0].length;
+    private int maxTilesOffset = levelTilesWide - Game.WIDTH_IN_TILES;
+    private int maxLevelOffsetX = maxTilesOffset * Game.SIZE_IN_TILES;
 
     /**
      * Constructor for a Playing object that will store a Game object.
@@ -47,8 +55,29 @@ public class Playing extends State implements StateMethods {
         if (!paused) {
             levelHandler.updateLevel();
             player.updatePlayer();
+            checkBorderProximity();
         } else {
             pauseOverlay.update();
+        }
+    }
+
+    /**
+     * Changes xLevelOffset once the player reaches the left or right borders.
+     */
+    private void checkBorderProximity() {
+        int playerX = (int) player.getHitbox().x;
+        int difference = playerX - xLevelOffset;
+
+        if (difference > rightBorder) {
+            xLevelOffset += (difference - rightBorder);
+        } else if (difference < leftBorder) {
+            xLevelOffset += (difference - leftBorder);
+        }
+
+        if (xLevelOffset > maxLevelOffsetX) {
+            xLevelOffset = maxLevelOffsetX;
+        } else if (xLevelOffset < 0) {
+            xLevelOffset = 0;
         }
     }
 
@@ -58,9 +87,13 @@ public class Playing extends State implements StateMethods {
      */
     @Override
     public void draw(Graphics g) {
-        levelHandler.drawLevel(g);
-        player.renderPlayer(g);
+        levelHandler.drawLevel(g, xLevelOffset);
+        player.renderPlayer(g, xLevelOffset);
         if (paused) {
+            // Tint the game when paused
+            g.setColor(new Color(0, 0, 0, 150));
+            g.fillRect(0, 0, Game.GAME_WIDTH, Game.GAME_HEIGHT);
+
             pauseOverlay.draw(g);
         }
     }
