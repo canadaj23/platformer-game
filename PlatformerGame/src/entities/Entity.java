@@ -37,7 +37,7 @@ public abstract class Entity {
      * @param g the Graphics object used for drawing
      */
     protected void drawHitbox(Graphics g, int levelOffset) {
-        g.setColor(Color.PINK);
+        g.setColor(Color.CYAN);
         g.drawRect((int) hitbox.x - levelOffset, (int) hitbox.y, (int) hitbox.width, (int) hitbox.height);
     }
 

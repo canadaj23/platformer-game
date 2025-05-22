@@ -9,6 +9,10 @@ import utils.LoadSave;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.util.Random;
+
+import static utils.Constants.Environment.*;
 
 /**
  * This class holds all the code needed for while in the playing state.
@@ -26,6 +30,10 @@ public class Playing extends State implements StateMethods {
     private int maxTilesOffset = levelTilesWide - Game.WIDTH_IN_TILES;
     private int maxLevelOffsetX = maxTilesOffset * Game.SIZE_IN_TILES;
 
+    private BufferedImage playingBackgroundImage, bigCloudImage, smallCloudImage;
+    private int[] smallCloudsYPosArray;
+    private Random random = new Random();
+
     /**
      * Constructor for a Playing object that will store a Game object.
      *
@@ -34,6 +42,7 @@ public class Playing extends State implements StateMethods {
     public Playing(Game game) {
         super(game);
         initClasses();
+        initBackground();
     }
 
     /**
@@ -45,6 +54,33 @@ public class Playing extends State implements StateMethods {
         player = new Player(200, 200, (int) (64 * Game.SCALE), (int) (40 * Game.SCALE));
         player.loadLevelData(levelHandler.getCurrentLevel().getLevelData());
         pauseOverlay = new PauseOverlay(this);
+    }
+
+    /**
+     * Creates the background and pertinent images.
+     */
+    private void initBackground() {
+        playingBackgroundImage = LoadSave.GetSpriteCollection(LoadSave.PLAYING_BACKGROUND);
+        createClouds();
+    }
+
+    /**
+     * Generates small and big clouds for the playing background.
+     */
+    private void createClouds() {
+        bigCloudImage = LoadSave.GetSpriteCollection(LoadSave.BIG_CLOUDS);
+        smallCloudImage = LoadSave.GetSpriteCollection(LoadSave.SMALL_CLOUDS);
+        generateSmallCloudYPositions();
+    }
+
+    /**
+     * Generates and stores random y-positions for small clouds.
+     */
+    private void generateSmallCloudYPositions() {
+        smallCloudsYPosArray = new int[8];
+        for (int i = 0; i < smallCloudsYPosArray.length; i++) {
+            smallCloudsYPosArray[i] = (int) (90 * Game.SCALE) + random.nextInt((int) (100 * Game.SCALE));
+        }
     }
 
     /**
@@ -87,14 +123,79 @@ public class Playing extends State implements StateMethods {
      */
     @Override
     public void draw(Graphics g) {
+        drawPlayingBackGround(g);
+
         levelHandler.drawLevel(g, xLevelOffset);
         player.renderPlayer(g, xLevelOffset);
         if (paused) {
-            // Tint the game when paused
-            g.setColor(new Color(0, 0, 0, 150));
-            g.fillRect(0, 0, Game.GAME_WIDTH, Game.GAME_HEIGHT);
+            drawPauseOverlay(g);
+        }
+    }
 
-            pauseOverlay.draw(g);
+    /**
+     * Draws both the playing background and the clouds.
+     * @param g the Graphics object for drawing
+     */
+    private void drawPlayingBackGround(Graphics g) {
+        g.drawImage(playingBackgroundImage, 0, 0, Game.GAME_WIDTH, Game.GAME_HEIGHT, null);
+        drawClouds(g);
+    }
+
+    /**
+     * Draws the pause overlay and tints the screen.
+     * @param g the Graphics object for drawing
+     */
+    private void drawPauseOverlay(Graphics g) {
+        tintWhenPaused(g);
+        pauseOverlay.draw(g);
+    }
+
+    /**
+     * Adds some tinting to the game to signify the game is paused.
+     * @param g the Graphics object for drawing
+     */
+    private void tintWhenPaused(Graphics g) {
+        g.setColor(new Color(0, 0, 0, 150));
+        g.fillRect(0, 0, Game.GAME_WIDTH, Game.GAME_HEIGHT);
+    }
+
+    /**
+     * Draws both small and big clouds for the background.
+     */
+    private void drawClouds(Graphics g) {
+        drawBigClouds(g);
+        drawSmallClouds(g);
+    }
+
+    /**
+     * Draws a few big clouds.
+     * @param g the Graphics object for drawing
+     */
+    private void drawBigClouds(Graphics g) {
+        for (int i = 0; i < 3; i++) {
+            g.drawImage(
+                    bigCloudImage,
+                    i * BIG_CLOUD_WIDTH - (int) (xLevelOffset * 0.3),
+                    (int) (204 * Game.SCALE),
+                    BIG_CLOUD_WIDTH,
+                    BIG_CLOUD_HEIGHT,
+                    null);
+        }
+    }
+
+    /**
+     * Draws a few small clouds with a random y-position.
+     * @param g the Graphics object for drawing
+     */
+    private void drawSmallClouds(Graphics g) {
+        for (int i = 0; i < smallCloudsYPosArray.length; i++) {
+            g.drawImage(
+                    smallCloudImage,
+                    i * 4 * SMALL_CLOUD_WIDTH - (int) (xLevelOffset * 0.7),
+                    smallCloudsYPosArray[i],
+                    SMALL_CLOUD_WIDTH,
+                    SMALL_CLOUD_HEIGHT,
+                    null);
         }
     }
 
