@@ -61,16 +61,16 @@ public class EnemyHandler {
     /**
      * Updates the enemies.
      */
-    public void update(int[][] levelData) {
-        updateManCrabs(levelData);
+    public void update(int[][] levelData, Player player) {
+        updateManCrabs(levelData, player);
     }
 
     /**
      * Specifically updates all Man-Crabs.
      */
-    private void updateManCrabs(int[][] levelData) {
+    private void updateManCrabs(int[][] levelData, Player player) {
         for (ManCrab mc : manCrabsArrayList) {
-            mc.update(levelData);
+            mc.update(levelData, player);
         }
     }
 

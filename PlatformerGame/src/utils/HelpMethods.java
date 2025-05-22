@@ -44,7 +44,12 @@ public class HelpMethods {
         }
 
         float xIndex = x / Game.SIZE_IN_TILES, yIndex = y / Game.SIZE_IN_TILES;
-        int value = levelData[(int) yIndex][(int) xIndex];
+
+        return IsTileSolid((int) xIndex, (int) yIndex, levelData);
+    }
+
+    public static boolean IsTileSolid(int xTile, int yTile, int[][] levelData) {
+        int value = levelData[yTile][xTile];
 
         return value != 11;
     }
@@ -102,6 +107,11 @@ public class HelpMethods {
 
     /**
      * Returns whether the tile the entity is on is the floor.
+     * </p>
+     * The entity will change directions before reaching an edge.
+     * <p>
+     * A better way to determine the outcome is to calculate for
+     * the bottom left and bottom right.
      * @param hitbox        the entity's hitbox
      * @param xSpeed        the entity's horizontal speed
      * @param levelData     the level data
@@ -109,5 +119,47 @@ public class HelpMethods {
      */
     public static boolean IsFloorTile(Rectangle2D.Float hitbox, float xSpeed, int[][] levelData) {
         return IsSolid(hitbox.x + xSpeed, hitbox.y + hitbox.height + 1, levelData);
+    }
+
+    /**
+     * Determines if one entity is in sight of another.
+     * @param levelData     the level data
+     * @param hitboxA       the hitbox of entity A
+     * @param hitboxB       the hitbox of entity B
+     * @param yTile      the y-position of a tile
+     * @return whether one entity is in sight of another
+     */
+    public static boolean IsInSight(
+            int[][] levelData,
+            Rectangle2D.Float hitboxA,
+            Rectangle2D.Float hitboxB,
+            int yTile) {
+
+        int xTileForA = (int) (hitboxA.x / Game.SIZE_IN_TILES);
+        int xTileForB = (int) (hitboxB.x / Game.SIZE_IN_TILES);
+
+        if (xTileForA > xTileForB) {
+            return AreAllTilesWalkable(xTileForB, xTileForA, yTile, levelData);
+        } else {
+            return AreAllTilesWalkable(xTileForA, xTileForB, yTile, levelData);
+        }
+    }
+
+    /**
+     * Determines whether all tiles in front of the entity are walkable.
+     * @param xStart the starting x
+     * @param xEnd the ending x
+     * @param y the y-position
+     * @param levelData the level data
+     * @return whether all tiles in front of the entity are walkable
+     */
+    public static boolean AreAllTilesWalkable(int xStart, int xEnd, int y, int[][] levelData) {
+        for (int i = 0; i < xEnd - xStart; i++) {
+            if (IsTileSolid(xStart + i, y, levelData) || !IsTileSolid(xStart + i, y + 1, levelData)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
