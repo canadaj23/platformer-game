@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import static utils.Constants.EnemyConstants.*;
+import static utils.Constants.Enemy.*;
 
 /**
  * This class will handle everything related to sprites including player, enemy, level, etc.
@@ -32,6 +32,7 @@ public class LoadSave {
     public static final String BIG_CLOUDS = "big_clouds";
     public static final String SMALL_CLOUDS = "small_clouds";
     public static final String MAN_CRAB_SPRITES = "man_crab_sprites";
+    public static final String PLAYER_STATUS_OVERLAY = "player_status_overlay";
 
     /**
      * @return a BufferedImage object of all the sprites of a given collection.

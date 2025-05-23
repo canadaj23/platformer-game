@@ -2,9 +2,17 @@ package entities;
 
 import main.Game;
 
-import static utils.Constants.EnemyConstants.*;
+import java.awt.*;
+import java.awt.geom.Rectangle2D;
+
+import static utils.Constants.Directions.*;
+import static utils.Constants.Enemy.*;
 
 public class ManCrab extends Enemy {
+    // Attack hitbox
+    private Rectangle2D.Float manCrabAttackHitbox;
+    private int attackHitboxOffsetX;
+
     /**
      * Constructor for a Man-Crab object.
      *
@@ -14,42 +22,75 @@ public class ManCrab extends Enemy {
     public ManCrab(float x, float y) {
         super(x, y, MAN_CRAB_WIDTH, MAN_CRAB_HEIGHT, MAN_CRAB);
 
-        initHitbox(x, y, (int) (22 * Game.SCALE), (int) (19 * Game.SCALE));
+        initEntityHitbox(x, y, (int) (22 * Game.SCALE), (int) (19 * Game.SCALE));
+        initManCrabAttackHitbox();
+    }
+
+    private void initManCrabAttackHitbox() {
+        manCrabAttackHitbox = new Rectangle2D.Float(x, y, (int) (82 * Game.SCALE), (int) (19 * Game.SCALE));
+        attackHitboxOffsetX = (int) (30 * Game.SCALE);
     }
 
     /**
      * Updates the many attributes of a Man-Crab.
      */
-    public void update(int[][] levelData, Player player) {
-        updateManCrabMovement(levelData, player);
-        updateAnimationTick();
+    protected void updateManCrab(int[][] levelData, Player player) {
+        updateManCrabBehavior(levelData, player);
+        updateEnemyAnimationTick();
+        updateManCrabAttackHitbox();
     }
 
     /**
-     * Updates the movement of a Man-Crab.
+     * Updates the behavior of a Man-Crab.
      */
-    private void updateManCrabMovement(int[][] levelData, Player player) {
+    private void updateManCrabBehavior(int[][] levelData, Player player) {
         // Check if this is a Man-Crab's first time updating
         if (firstUpdate) {
-            firstUpdateCheck(levelData);
+            firstEnemyUpdateCheck(levelData);
         }
         if (inAir) { // If the Man-Crab is in the air, make them fall to the ground/ceiling
-            fallToGroundCeiling(levelData);
+            enemyFallToGroundCeiling(levelData);
         } else { // Otherwise, the Man-Crab can patrol
-            setMovement(levelData, player);
+            setManCrabBehavior(levelData, player);
         }
+    }
+
+    /**
+     * Updates the Man-Crab's attack hitbox when moving.
+     */
+    private void updateManCrabAttackHitbox() {
+        manCrabAttackHitbox.x = hitbox.x - attackHitboxOffsetX;
+        manCrabAttackHitbox.y = hitbox.y;
+    }
+
+    public void drawManCrabAttackHitbox(Graphics g, int xLevelOffset) {
+        g.setColor(Color.BLUE);
+        g.drawRect(
+                (int) (manCrabAttackHitbox.x - xLevelOffset),
+                (int) manCrabAttackHitbox.y,
+                (int) manCrabAttackHitbox.width,
+                (int) manCrabAttackHitbox.height);
     }
 
     /**
      * Initializes a Man-Crab's movement.
      */
-    private void setMovement(int[][] levelData, Player player) {
+    private void setManCrabBehavior(int[][] levelData, Player player) {
         switch (enemyState) {
-            case IDLE -> {setEnemyState(RUNNING);}
+            case IDLE -> setEnemyState(RUNNING);
             case RUNNING -> {
-                tryToAttack(levelData, player);
+                manCrabTryToAttack(levelData, player);
                 makeEnemyMove(levelData, player);
             }
+            case ATTACK -> {
+                if (animationIndex == 0) {
+                    attackChecked = false;
+                }
+                if (animationIndex == 3 && !attackChecked) {
+                    checkPlayerHitByEnemy(manCrabAttackHitbox, player);
+                }
+            }
+            case HIT -> {}
         }
     }
 
@@ -58,12 +99,28 @@ public class ManCrab extends Enemy {
      * @param levelData the level data
      * @param player who the Man-Crab will follow and attack if within range
      */
-    private void tryToAttack(int[][] levelData, Player player) {
+    private void manCrabTryToAttack(int[][] levelData, Player player) {
         if (canSeePlayer(levelData, player)) {
             turnToPlayer(player);
         }
         if (isPlayerInAttackRange(player)) {
             setEnemyState(ATTACK);
         }
+    }
+
+    /**
+     *
+     * @return x-direction the Man-Crab will go
+     */
+    public int flipManCrabX() {
+        return walkingDirection == RIGHT ? width : 0;
+    }
+
+    /**
+     *
+     * @return the direction the Man-Crab faces (left or right)
+     */
+    public int flipManCrabW() {
+        return walkingDirection == RIGHT ? -1 : 1;
     }
 }

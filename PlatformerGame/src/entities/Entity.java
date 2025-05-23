@@ -28,7 +28,7 @@ public abstract class Entity {
     /**
      * Initializes the Entity object's hitbox.
      */
-    protected void initHitbox(float x, float y, int width, int height) {
+    protected void initEntityHitbox(float x, float y, int width, int height) {
         hitbox = new Rectangle2D.Float(x, y, width, height);
     }
 
@@ -36,24 +36,16 @@ public abstract class Entity {
      * Draws the Entity object's hitbox for debugging.
      * @param g the Graphics object used for drawing
      */
-    protected void drawHitbox(Graphics g, int levelOffset) {
+    protected void drawEntityHitbox(Graphics g, int levelOffset) {
         g.setColor(Color.CYAN);
         g.drawRect((int) hitbox.x - levelOffset, (int) hitbox.y, (int) hitbox.width, (int) hitbox.height);
     }
-
-//    /**
-//     * Updates the Entity objects' hitbox based on x- and y-coordinates.
-//     */
-//    protected void updateHitbox() {
-//        hitbox.x = (int) x;
-//        hitbox.y = (int) y;
-//    }
 
     /**
      *
      * @return the Entity object's hitbox
      */
-    public Rectangle2D.Float getHitbox() {
+    public Rectangle2D.Float getEntityHitbox() {
         return hitbox;
     }
 }

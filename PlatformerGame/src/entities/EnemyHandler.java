@@ -4,10 +4,11 @@ import gamestates.Playing;
 import utils.LoadSave;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import static utils.Constants.EnemyConstants.*;
+import static utils.Constants.Enemy.*;
 
 /**
  * This class will hold all the enemy-related code.
@@ -70,7 +71,9 @@ public class EnemyHandler {
      */
     private void updateManCrabs(int[][] levelData, Player player) {
         for (ManCrab mc : manCrabsArrayList) {
-            mc.update(levelData, player);
+            if (mc.isActive()) {
+                mc.updateManCrab(levelData, player);
+            }
         }
     }
 
@@ -78,28 +81,62 @@ public class EnemyHandler {
      * Draws the enemies.
      *
      * @param g             the Graphics object for drawing
-     * @param levelOffset   the offset of the enemy and left/right border
+     * @param xLevelOffset   the offset of the enemy and left/right border
      */
-    public void draw(Graphics g, int levelOffset) {
-        drawManCrabs(g, levelOffset);
+    public void drawEnemies(Graphics g, int xLevelOffset) {
+        drawManCrabs(g, xLevelOffset);
     }
 
     /**
      * Specifically draws the Man-Crabs.
      *
      * @param g             the Graphics object for drawing
-     * @param levelOffset   the offset of a Man-Crab and the left/right border
+     * @param xLevelOffset   the offset of a Man-Crab and the left/right border
      */
-    private void drawManCrabs(Graphics g, int levelOffset) {
+    private void drawManCrabs(Graphics g, int xLevelOffset) {
         for (ManCrab mc : manCrabsArrayList) {
-            g.drawImage(
-                    manCrabArray[mc.getEnemyState()][mc.getAnimationIndex()],
-                    ((int) mc.getHitbox().x - MAN_CRAB_OFFSET_X) - levelOffset,
-                    (int) (mc.getHitbox().y - MAN_CRAB_OFFSET_Y),
-                    MAN_CRAB_WIDTH,
-                    MAN_CRAB_HEIGHT,
-                    null);
-            mc.drawHitbox(g, levelOffset);
+            if (mc.isActive()) {
+                g.drawImage(
+                        manCrabArray[mc.getEnemyState()][mc.getAnimationIndex()],
+                        (int) mc.getEntityHitbox().x - xLevelOffset - MAN_CRAB_OFFSET_X + mc.flipManCrabX(),
+                        (int) (mc.getEntityHitbox().y - MAN_CRAB_OFFSET_Y),
+                        MAN_CRAB_WIDTH * mc.flipManCrabW(),
+                        MAN_CRAB_HEIGHT,
+                        null);
+                mc.drawEntityHitbox(g, xLevelOffset);
+                mc.drawManCrabAttackHitbox(g, xLevelOffset);
+            }
+        }
+    }
+
+    /**
+     * Checks if the enemy was hit by the player.
+     * @param playerAttackHitbox the player's attack hitbox
+     */
+    public void checkEnemyHitByPlayer(Rectangle2D.Float playerAttackHitbox) {
+        for (ManCrab mc : manCrabsArrayList) {
+            if (mc.isActive()) {
+                if (playerAttackHitbox.intersects(mc.getEntityHitbox())) {
+                    mc.takeDamage(10);
+                    return;
+                }
+            }
+        }
+    }
+
+    /**
+     * Resets all enemies' attributes to their default values.
+     */
+    public void resetAllEnemies() {
+        resetManCrabs();
+    }
+
+    /**
+     * Specifically resets all Man-Crabs' attributes to their default values.
+     */
+    private void resetManCrabs() {
+        for (ManCrab mc : manCrabsArrayList) {
+            mc.resetEnemy();
         }
     }
 }

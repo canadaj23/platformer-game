@@ -5,19 +5,28 @@ import main.Game;
 import java.awt.geom.Rectangle2D;
 
 import static utils.Constants.Directions.*;
-import static utils.Constants.EnemyConstants.*;
+import static utils.Constants.Enemy.*;
 import static utils.HelpMethods.*;
 
 public abstract class Enemy extends Entity {
+    // Enemy attributes
     protected int animationIndex, enemyState, enemyType;
     protected int animationTick, animationSpeed = 25;
+    protected boolean active = true, attackChecked;
+
+    // Enemy physics
     protected boolean firstUpdate = true, inAir;
     protected float fallSpeed, gravity = 0.04f * Game.SCALE;
     protected float enemyWalkingSpeed = 0.35f * Game.SCALE;
     protected int walkingDirection = LEFT;
+
+    // Enemy attacking/patrolling
     protected int enemyTileY;
     protected float attackRange = Game.SIZE_IN_TILES; // range is in tiles
     protected final int RANGE_MULTIPLIER = 5;
+
+    // Enemy health
+    protected int maxEnemyHealth, currentEnemyHealth;
 
     /**
      * Constructor for an Enemy object.
@@ -31,21 +40,31 @@ public abstract class Enemy extends Entity {
     public Enemy(float x, float y, int width, int height, int enemyType) {
         super(x, y, width, height);
         this.enemyType = enemyType;
-        initHitbox(x, y, width, height);
+        initEntityHitbox(x, y, width, height);
+        setUpHealth();
+    }
+
+    /**
+     * Sets up the health of any enemy using its type.
+     */
+    private void setUpHealth() {
+        maxEnemyHealth = GetEnemyMaxHealth(enemyType);
+        currentEnemyHealth = maxEnemyHealth;
     }
 
     /**
      * Updates the animation tick of an enemy.
      */
-    protected void updateAnimationTick() {
+    protected void updateEnemyAnimationTick() {
         animationTick++;
         if (animationTick >= animationSpeed) {
             animationTick = 0;
             animationIndex++;
             if (animationIndex >= GetEnemySpriteAmount(enemyType, enemyState)) {
                 animationIndex = 0;
-                if (enemyState == ATTACK) {
-                    enemyState = IDLE;
+                switch (enemyState) {
+                    case ATTACK, HIT -> enemyState = IDLE;
+                    case DEAD -> active = false;
                 }
             }
         }
@@ -54,7 +73,7 @@ public abstract class Enemy extends Entity {
     /**
      * Checks if this is the enemy's first time updating (i.e., when the level first starts).
      */
-    protected void firstUpdateCheck(int[][] levelData) {
+    protected void firstEnemyUpdateCheck(int[][] levelData) {
         if (!IsEntityOnFloor(hitbox, levelData)) {
             inAir = true;
         }
@@ -65,7 +84,7 @@ public abstract class Enemy extends Entity {
      * Makes an enemy fall to the ground/ceiling if in the air.
      * @param levelData the level data
      */
-    protected void fallToGroundCeiling(int[][] levelData) {
+    protected void enemyFallToGroundCeiling(int[][] levelData) {
         if (CanMoveHere(hitbox.x, hitbox.y + fallSpeed, hitbox.width, hitbox.height, levelData)) {
             hitbox.y += fallSpeed;
             fallSpeed += gravity;
@@ -90,13 +109,13 @@ public abstract class Enemy extends Entity {
             }
         }
 
-        changeWalkDirection();
+        changeEnemyWalkingDirection();
     }
 
     /**
      * Changes the horizontal direction of the enemy.
      */
-    protected void changeWalkDirection() {
+    protected void changeEnemyWalkingDirection() {
         walkingDirection = walkingDirection == LEFT ? RIGHT : LEFT;
     }
 
@@ -125,7 +144,7 @@ public abstract class Enemy extends Entity {
      * @return whether the enemy can see the player
      */
     protected boolean canSeePlayer(int[][] levelData, Player player) {
-        int playerTileY = (int) (player.getHitbox().y / Game.SIZE_IN_TILES);
+        int playerTileY = (int) (player.getEntityHitbox().y / Game.SIZE_IN_TILES);
 
         return  (playerTileY == enemyTileY) &&
                 (isPlayerInRange(player)) &&
@@ -156,6 +175,27 @@ public abstract class Enemy extends Entity {
     }
 
     /**
+     * The enemy receives damage from the player, lowering its health.
+     * @param damageAmount the amount of damage to receive by the enemy
+     */
+    public void takeDamage(int damageAmount) {
+        currentEnemyHealth -= damageAmount;
+        setEnemyState(currentEnemyHealth <= 0 ? DEAD : HIT);
+    }
+
+    /**
+     * Checks if the enemy attack hitbox collides with the player's hitbox.
+     * @param enemyAttackHitbox the enemy's attack hitbox
+     * @param player who the enemy is interacting with
+     */
+    protected void checkPlayerHitByEnemy(Rectangle2D.Float enemyAttackHitbox, Player player) {
+        if (enemyAttackHitbox.intersects(player.hitbox)) {
+            player.changePlayerHealth(-GetEnemyDamage(enemyType));
+        }
+        attackChecked = true;
+    }
+
+    /**
      *
      * @return the enemy's animation index
      */
@@ -169,5 +209,26 @@ public abstract class Enemy extends Entity {
      */
     public int getEnemyState() {
         return enemyState;
+    }
+
+    /**
+     *
+     * @return if the enemy is active
+     */
+    public boolean isActive() {
+        return active;
+    }
+
+    /**
+     * Resets the enemy's attributes to their default values.
+     */
+    public void resetEnemy() {
+        hitbox.x = x;
+        hitbox.y = y;
+        firstUpdate = true;
+        currentEnemyHealth = maxEnemyHealth;
+        setEnemyState(IDLE);
+        active = true;
+        fallSpeed = 0;
     }
 }
