@@ -4,6 +4,11 @@ import main.Game;
 
 public class Constants {
 
+    public static class Entity {
+        public static final float GRAVITY = 0.04f * Game.SCALE;
+        public static final int ANIMATION_SPEED = 25;
+    }
+
     /**
      * This class holds everything enemy-related.
      */

@@ -9,8 +9,6 @@ import static utils.Constants.Directions.*;
 import static utils.Constants.Enemy.*;
 
 public class ManCrab extends Enemy {
-    // Attack hitbox
-    private Rectangle2D.Float manCrabAttackHitbox;
     private int attackHitboxOffsetX;
 
     /**
@@ -22,7 +20,7 @@ public class ManCrab extends Enemy {
     public ManCrab(float x, float y) {
         super(x, y, MAN_CRAB_WIDTH, MAN_CRAB_HEIGHT, MAN_CRAB);
 
-        initEntityHitbox(x, y, (int) (22 * Game.SCALE), (int) (19 * Game.SCALE));
+        initEntityHitbox(22, 19);
         initManCrabAttackHitbox();
     }
 
@@ -30,7 +28,7 @@ public class ManCrab extends Enemy {
      * Creates the attack hitbox for a Man-Crab.
      */
     private void initManCrabAttackHitbox() {
-        manCrabAttackHitbox = new Rectangle2D.Float(x, y, (int) (82 * Game.SCALE), (int) (19 * Game.SCALE));
+        entityAttackHitBox = new Rectangle2D.Float(x, y, (int) (82 * Game.SCALE), (int) (19 * Game.SCALE));
         attackHitboxOffsetX = (int) (30 * Game.SCALE);
     }
 
@@ -62,24 +60,15 @@ public class ManCrab extends Enemy {
      * Updates the Man-Crab's attack hitbox when moving.
      */
     private void updateManCrabAttackHitbox() {
-        manCrabAttackHitbox.x = hitbox.x - attackHitboxOffsetX;
-        manCrabAttackHitbox.y = hitbox.y;
-    }
-
-    public void drawManCrabAttackHitbox(Graphics g, int xLevelOffset) {
-        g.setColor(Color.BLUE);
-        g.drawRect(
-                (int) (manCrabAttackHitbox.x - xLevelOffset),
-                (int) manCrabAttackHitbox.y,
-                (int) manCrabAttackHitbox.width,
-                (int) manCrabAttackHitbox.height);
+        entityAttackHitBox.x = hitbox.x - attackHitboxOffsetX;
+        entityAttackHitBox.y = hitbox.y;
     }
 
     /**
      * Initializes a Man-Crab's movement.
      */
     private void setManCrabBehavior(int[][] levelData, Player player) {
-        switch (enemyState) {
+        switch (entityState) {
             case IDLE -> setEnemyState(RUNNING);
             case RUNNING -> {
                 manCrabTryToAttack(levelData, player);
@@ -90,7 +79,7 @@ public class ManCrab extends Enemy {
                     attackChecked = false;
                 }
                 if (animationIndex == 3 && !attackChecked) {
-                    checkPlayerHitByEnemy(manCrabAttackHitbox, player);
+                    checkPlayerHitByEnemy(entityAttackHitBox, player);
                 }
             }
             case HIT -> {}

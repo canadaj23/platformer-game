@@ -1,5 +1,7 @@
 package entities;
 
+import main.Game;
+
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
@@ -10,6 +12,13 @@ public abstract class Entity {
     protected float x, y;
     protected int width, height;
     protected Rectangle2D.Float hitbox;
+    protected int animationTick, animationIndex;
+    protected int entityState;
+    protected float airSpeed;
+    protected boolean inAir = false;
+    protected int maxEntityHealth, currentEntityHealth;
+    protected Rectangle2D.Float entityAttackHitBox;
+    protected float entitySpeed = 1.0f * Game.SCALE;
 
     /**
      * Constructor for an Entity object.
@@ -28,12 +37,12 @@ public abstract class Entity {
     /**
      * Initializes the Entity object's hitbox.
      */
-    protected void initEntityHitbox(float x, float y, int width, int height) {
-        hitbox = new Rectangle2D.Float(x, y, width, height);
+    protected void initEntityHitbox(int width, int height) {
+        hitbox = new Rectangle2D.Float(x, y,  (int) (width * Game.SCALE), (int) (height * Game.SCALE));
     }
 
     /**
-     * Draws the Entity object's hitbox for debugging.
+     * Draws the entity's hitbox for debugging.
      * @param g the Graphics object used for drawing
      */
     protected void drawEntityHitbox(Graphics g, int levelOffset) {
@@ -42,10 +51,38 @@ public abstract class Entity {
     }
 
     /**
-     *
+     * Draws the attack hitbox for an entity for debugging.
+     * @param g the Graphics object for drawing
+     * @param xLevelOffset the offset the hitbox uses for a correct position
+     */
+    protected void drawEntityAttackHitbox(Graphics g, int xLevelOffset) {
+        g.setColor(Color.BLUE);
+        g.drawRect(
+                (int) entityAttackHitBox.x - xLevelOffset,
+                (int) entityAttackHitBox.y,
+                (int) entityAttackHitBox.width,
+                (int) entityAttackHitBox.height);
+    }
+
+    /**
      * @return the Entity object's hitbox
      */
     public Rectangle2D.Float getEntityHitbox() {
         return hitbox;
+    }
+
+    /**
+     * @return the entity's state
+     */
+    public int getEntityState() {
+        return entityState;
+    }
+
+    /**
+     *
+     * @return the entity's animation index
+     */
+    public int getEntityAnimationIndex() {
+        return animationIndex;
     }
 }

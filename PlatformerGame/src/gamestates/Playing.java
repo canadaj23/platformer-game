@@ -29,6 +29,7 @@ public class Playing extends State implements StateMethods {
     private GameOverScreen gameOverScreen;
     private LevelCompletedOverlay levelCompletedOverlay;
     private boolean paused = false, gameOver, levelCompleted;
+    private int numberLevelsCompleted = 0;
 
     private int xLevelOffset;
     private int leftBorder = (int) (0.2 * Game.GAME_WIDTH);
@@ -182,7 +183,7 @@ public class Playing extends State implements StateMethods {
             xLevelOffset += (difference - leftBorder);
         }
 
-        if (xLevelOffset > maxLevelOffsetX) {
+        if (xLevelOffset >= maxLevelOffsetX) {
             xLevelOffset = maxLevelOffsetX;
         } else if (xLevelOffset < 0) {
             xLevelOffset = 0;

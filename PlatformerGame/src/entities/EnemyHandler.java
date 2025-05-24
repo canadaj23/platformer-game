@@ -107,14 +107,14 @@ public class EnemyHandler {
         for (ManCrab mc : manCrabsArrayList) {
             if (mc.isActive()) {
                 g.drawImage(
-                        manCrabArray[mc.getEnemyState()][mc.getAnimationIndex()],
+                        manCrabArray[mc.getEntityState()][mc.getEntityAnimationIndex()],
                         (int) mc.getEntityHitbox().x - xLevelOffset - MAN_CRAB_OFFSET_X + mc.flipManCrabX(),
                         (int) (mc.getEntityHitbox().y - MAN_CRAB_OFFSET_Y),
                         MAN_CRAB_WIDTH * mc.flipManCrabW(),
                         MAN_CRAB_HEIGHT,
                         null);
                 mc.drawEntityHitbox(g, xLevelOffset);
-                mc.drawManCrabAttackHitbox(g, xLevelOffset);
+                mc.drawEntityAttackHitbox(g, xLevelOffset);
             }
         }
     }
