@@ -31,8 +31,8 @@ public class Player extends Entity {
     private float airSpeed = 0f, gravity = 0.04f * Game.SCALE;
     private float jumpSpeed = -2.5f * Game.SCALE;
     private float fallSpeedAfterCollision = 0.5f * Game.SCALE;
-    private boolean inAir = true;
-    private boolean attackChecked;
+    private boolean inAir = true, attackChecked;
+    private int flipX = 0, flipWidth = 1;
 
     // Status Bar UI
     private BufferedImage statusOverlayImage;
@@ -53,8 +53,6 @@ public class Player extends Entity {
     // Attack hitbox
     private Rectangle2D.Float playerAttackHitBox;
 
-    private int flipX = 0, flipWidth = 1;
-
     /**
      * Constructor for creating a Player object.
      *
@@ -67,8 +65,15 @@ public class Player extends Entity {
         super(x, y, width, height);
         this.playing = playing;
         loadPlayerAnimations();
-        initEntityHitbox(x, y, (int) (20 * Game.SCALE), (int) (28 * Game.SCALE));
+        initEntityHitbox(x, y, (int) (20 * Game.SCALE), (int) (27 * Game.SCALE));
         initPlayerAttackHitBox();
+    }
+
+    public void setPlayerSpawnPoint(Point playerSpawnPoint) {
+        this.x = playerSpawnPoint.x;
+        this.y = playerSpawnPoint.y;
+        hitbox.x = x;
+        hitbox.y = y;
     }
 
     /**
@@ -212,7 +217,7 @@ public class Player extends Entity {
             return;
         }
         attackChecked = true;
-        playing.checkEnemyHitByPlayer(hitbox);
+        playing.checkEnemyHitByPlayer(playerAttackHitBox);
     }
 
     /**
@@ -466,6 +471,8 @@ public class Player extends Entity {
      */
     public void resetAll() {
         resetPlayerDirBooleans();
+        flipX = 0;
+        flipWidth = 1;
         inAir = false;
         attacking = false;
         moving = false;

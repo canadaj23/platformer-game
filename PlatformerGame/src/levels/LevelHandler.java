@@ -1,10 +1,12 @@
 package levels;
 
+import gamestates.GameState;
 import main.Game;
 import utils.LoadSave;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 /**
  * This class will take care of everything related to a level.
@@ -12,7 +14,8 @@ import java.awt.image.BufferedImage;
 public class LevelHandler {
     private Game game;
     private BufferedImage[] levelSprites;
-    private Level levelOne;
+    private ArrayList<Level> levels;
+    private int levelIndex = 0;
 
     /**
      * Constructor for a LevelHandler object.
@@ -21,7 +24,8 @@ public class LevelHandler {
     public LevelHandler(Game game) {
         this.game = game;
         importOutsideSprites();
-        levelOne = new Level(LoadSave.GetLevelData());
+        levels = new ArrayList<>();
+        generateAllLevels();
     }
 
     /**
@@ -42,6 +46,17 @@ public class LevelHandler {
     }
 
     /**
+     * Creates all the levels and stores them in an ArrayList.
+     */
+    private void generateAllLevels() {
+        BufferedImage[] allLevels = LoadSave.GetAllLevels();
+
+        for (BufferedImage levelImage : allLevels) {
+            levels.add(new Level(levelImage));
+        }
+    }
+
+    /**
      * Draws the current level of the game.
      *
      * @param g            the Graphics object used for drawing
@@ -49,8 +64,8 @@ public class LevelHandler {
      */
     public void drawLevel(Graphics g, int levelOffset) {
         for (int j = 0; j < Game.HEIGHT_IN_TILES; j++) {
-            for (int i = 0; i < levelOne.getLevelData()[0].length; i++) {
-                int index = levelOne.getSpriteIndex(i, j);
+            for (int i = 0; i < levels.get(levelIndex).getLevelData()[0].length; i++) {
+                int index = levels.get(levelIndex).getSpriteIndex(i, j);
                 g.drawImage(
                         levelSprites[index],
                         (i * Game.SIZE_IN_TILES) - levelOffset,
@@ -70,11 +85,45 @@ public class LevelHandler {
     }
 
     /**
-     * Returns the current level.
-     * TODO: create more levels
+     * Loads the next level, if there is one.
+     */
+    public void loadNextLevel() {
+        levelIndex++;
+
+        if (levelIndex >= levels.size()) {
+            levelIndex = 0;
+            System.out.println("Game completed!");
+            GameState.state = GameState.MENU;
+        }
+
+        generateNextLevel();
+    }
+
+    private void generateNextLevel() {
+        Level nextLevel = levels.get(levelIndex);
+        game.getPlaying().getEnemyHandler().loadEnemies(nextLevel);
+        game.getPlaying().getPlayer().loadLevelData(nextLevel.getLevelData());
+        game.getPlaying().setMaxLevelOffsetX(nextLevel.getMaxLevelOffsetX());
+    }
+
+    /**
      * @return the current level
      */
     public Level getCurrentLevel() {
-        return levelOne;
+        return levels.get(levelIndex);
+    }
+
+    /**
+     * @return the amount of levels
+     */
+    public int getLevelAmount() {
+        return levels.size();
+    }
+
+    /**
+     * @return what number the current level is
+     */
+    public int getLevelIndex() {
+        return levelIndex;
     }
 }

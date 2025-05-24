@@ -161,7 +161,8 @@ public class PauseOverlay {
             GameState.state = GameState.MENU;
             playing.resumeGame();
         } else if (isOnButton(e, restartButton)) {
-            System.out.println("Restart level!");
+            playing.resetAll();
+            playing.resumeGame();
         } else if (isOnButton(e, resumeButton)) {
             playing.resumeGame();
         }

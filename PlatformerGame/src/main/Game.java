@@ -34,6 +34,7 @@ public class Game implements Runnable {
 
         gamePanel = new GamePanel(this);
         gameWindow = new GameWindow(gamePanel);
+        gamePanel.setFocusable(true);
         gamePanel.requestFocus();
 
         startGameLoop();
@@ -125,14 +126,18 @@ public class Game implements Runnable {
             // Determine FPS
             if (System.currentTimeMillis() - lastCheck >= 1000) {
                 lastCheck = System.currentTimeMillis();
-                System.out.println("=======");
-                System.out.println(frames + " FPS");
-                System.out.println(updates + " UPS");
-                System.out.println("=======");
+//                displayFPSAndUPS(frames, updates);
                 frames = 0;
                 updates = 0;
             }
         }
+    }
+
+    private void displayFPSAndUPS(int frames, int updates) {
+        System.out.println("=======");
+        System.out.println(frames + " FPS");
+        System.out.println(updates + " UPS");
+        System.out.println("=======");
     }
 
     /**

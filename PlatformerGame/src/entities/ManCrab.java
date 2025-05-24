@@ -26,6 +26,9 @@ public class ManCrab extends Enemy {
         initManCrabAttackHitbox();
     }
 
+    /**
+     * Creates the attack hitbox for a Man-Crab.
+     */
     private void initManCrabAttackHitbox() {
         manCrabAttackHitbox = new Rectangle2D.Float(x, y, (int) (82 * Game.SCALE), (int) (19 * Game.SCALE));
         attackHitboxOffsetX = (int) (30 * Game.SCALE);
@@ -102,9 +105,9 @@ public class ManCrab extends Enemy {
     private void manCrabTryToAttack(int[][] levelData, Player player) {
         if (canSeePlayer(levelData, player)) {
             turnToPlayer(player);
-        }
-        if (isPlayerInAttackRange(player)) {
-            setEnemyState(ATTACK);
+            if (isPlayerInAttackRange(player)) {
+                setEnemyState(ATTACK);
+            }
         }
     }
 

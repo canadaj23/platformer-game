@@ -1,6 +1,7 @@
 package entities;
 
 import gamestates.Playing;
+import levels.Level;
 import utils.LoadSave;
 
 import java.awt.*;
@@ -22,7 +23,6 @@ public class EnemyHandler {
         this.playing = playing;
         
         loadEnemyImages();
-        addEnemies();
     }
 
     private void loadEnemyImages() {
@@ -45,24 +45,28 @@ public class EnemyHandler {
     }
 
     /**
-     * Adds enemies to their Array Lists to be displayed.
+     * Loads enemies from their ArrayLists to be displayed.
      */
-    private void addEnemies() {
-        addManCrabs();
+    public void loadEnemies(Level level) {
+        loadManCrabs(level);
     }
 
     /**
-     * Specifically adds Man-Crabs to their pertinent Array List.
+     * Specifically loads Man-Crabs from their pertinent ArrayList.
      */
-    private void addManCrabs() {
-        manCrabsArrayList = LoadSave.GetManCrabs();
-        System.out.println("Size of Man-Crab Array List: " + manCrabsArrayList.size());
+    private void loadManCrabs(Level level) {
+        manCrabsArrayList = level.getManCrabsArrayList();
+        if (!manCrabsArrayList.isEmpty()) {
+            System.out.println(
+                    "Number of Man-Crabs for Level " +
+                            (playing.getLevelHandler().getLevelIndex() + 1) + ": " + manCrabsArrayList.size());
+        }
     }
 
     /**
      * Updates the enemies.
      */
-    public void update(int[][] levelData, Player player) {
+    public void updateEnemies(int[][] levelData, Player player) {
         updateManCrabs(levelData, player);
     }
 
@@ -70,10 +74,16 @@ public class EnemyHandler {
      * Specifically updates all Man-Crabs.
      */
     private void updateManCrabs(int[][] levelData, Player player) {
+        boolean areAnyActive = false;
         for (ManCrab mc : manCrabsArrayList) {
             if (mc.isActive()) {
                 mc.updateManCrab(levelData, player);
+                areAnyActive = true;
             }
+        }
+
+        if (!areAnyActive) {
+            playing.setLevelCompleted(true);
         }
     }
 
@@ -114,6 +124,14 @@ public class EnemyHandler {
      * @param playerAttackHitbox the player's attack hitbox
      */
     public void checkEnemyHitByPlayer(Rectangle2D.Float playerAttackHitbox) {
+        checkManCrabHitByPlayer(playerAttackHitbox);
+    }
+
+    /**
+     * Specifically checks if a Man-Crab was hit by the player.
+     * @param playerAttackHitbox the player's attack hitbox
+     */
+    private void checkManCrabHitByPlayer(Rectangle2D.Float playerAttackHitbox) {
         for (ManCrab mc : manCrabsArrayList) {
             if (mc.isActive()) {
                 if (playerAttackHitbox.intersects(mc.getEntityHitbox())) {

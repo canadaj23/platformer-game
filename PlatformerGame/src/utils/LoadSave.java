@@ -6,8 +6,11 @@ import main.Game;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 
 import static utils.Constants.Enemy.*;
@@ -18,9 +21,6 @@ import static utils.Constants.Enemy.*;
 public class LoadSave {
     public static final String PLAYER_SPRITES = "player_sprites";
     public static final String LEVEL_ELEMENTS = "outside_sprites";
-    public static final String LEVEL_ONE_DATA = "level_one_data";
-    public static final String LEVEL_ONE_DATA_LONG = "level_one_data_long";
-    public static final String LEVEL_ONE_DATA_LONG_WITH_ENEMY = "level_one_data_long_with_enemy";
     public static final String MENU_BUTTONS = "menu_buttons";
     public static final String MENU_OVERLAY = "menu_overlay";
     public static final String PAUSE_OVERLAY = "pause_overlay";
@@ -33,6 +33,7 @@ public class LoadSave {
     public static final String SMALL_CLOUDS = "small_clouds";
     public static final String MAN_CRAB_SPRITES = "man_crab_sprites";
     public static final String PLAYER_STATUS_OVERLAY = "player_status_overlay";
+    public static final String LEVEL_COMPLETED_OVERLAY = "level_completed_overlay";
 
     /**
      * @return a BufferedImage object of all the sprites of a given collection.
@@ -58,43 +59,62 @@ public class LoadSave {
         return image;
     }
 
-    public static ArrayList<ManCrab> GetManCrabs() {
-        BufferedImage image = GetSpriteCollection(LEVEL_ONE_DATA_LONG_WITH_ENEMY);
-        ArrayList<ManCrab> manCrabArrayList = new ArrayList<>();
+    /**
+     * All levels will be added to a BufferedImage array for level switching.
+     * @return all the levels of the game in a BufferedImage array
+     */
+    public static BufferedImage[] GetAllLevels() {
+        URL url = LoadSave.class.getResource("/lvls");
+        File file = null;
 
-        for (int j = 0; j < image.getHeight(); j++) {
-            for (int i = 0; i < image.getWidth(); i++) {
-                Color color = new Color(image.getRGB(i, j));
-                int value = color.getGreen();
-                if (value == MAN_CRAB) {
-                    manCrabArrayList.add(new ManCrab(i * Game.SIZE_IN_TILES, j * Game.SIZE_IN_TILES));
-                }
-            }
+        try {
+            file = new File(url.toURI());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
 
-        return manCrabArrayList;
+        File[] files = file.listFiles();
+        File[] sortedFiles =  sortFiles(files);
+
+        return addImages(sortedFiles);
     }
 
     /**
-     * @return the level data for a given level
+     * Sorts the levels in ascending order and returns a sorted array.
+     * @param files the unsorted levels
+     * @return a sorted array of levels
      */
-    public static int[][] GetLevelData() {
-        // Level data will change (e.g., LEVEL_ONE_DATA vs. LEVEL_ONE_DATA_LONG)
-        BufferedImage image = GetSpriteCollection(LEVEL_ONE_DATA_LONG_WITH_ENEMY);
-        // getHeight and getWidth are for visible size, not necessarily the level size
-        int[][] levelData = new int[image.getHeight()][image.getWidth()];
+    private static File[] sortFiles(File[] files) {
+        File[] sortedFiles = new File[files.length];
 
-        for (int j = 0; j < image.getHeight(); j++) {
-            for (int i = 0; i < image.getWidth(); i++) {
-                Color color = new Color(image.getRGB(i, j));
-                int value = color.getRed();
-                if (value >= 48) {
-                    value = 0;
+        // Sort the files names in ascending order
+        for (int j = 0; j < sortedFiles.length; j++) {
+            for (int i = 0; i < files.length; i++) {
+                if (files[j].getName().equals((i + 1) + ".png")) {
+                    sortedFiles[i] = files[j];
                 }
-                levelData[j][i] = value;
             }
         }
 
-        return levelData;
+        return sortedFiles;
+    }
+
+    /**
+     * Takes the sorted levels and adds them to a BufferedImage array.
+     * @param sortedFiles the sorted levels
+     * @return an array of sorted level images
+     */
+    private static BufferedImage[] addImages(File[] sortedFiles) {
+        BufferedImage[] levelImages = new BufferedImage[sortedFiles.length];
+
+        for (int i = 0; i < levelImages.length; i++) {
+            try {
+                levelImages[i] = ImageIO.read(sortedFiles[i]);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return levelImages;
     }
 }

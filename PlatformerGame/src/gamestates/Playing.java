@@ -5,6 +5,7 @@ import entities.Player;
 import levels.LevelHandler;
 import main.Game;
 import ui.GameOverScreen;
+import ui.LevelCompletedOverlay;
 import ui.PauseOverlay;
 import utils.LoadSave;
 
@@ -26,14 +27,13 @@ public class Playing extends State implements StateMethods {
     private EnemyHandler enemyHandler;
     private PauseOverlay pauseOverlay;
     private GameOverScreen gameOverScreen;
-    private boolean paused = false, gameOver;
+    private LevelCompletedOverlay levelCompletedOverlay;
+    private boolean paused = false, gameOver, levelCompleted;
 
     private int xLevelOffset;
     private int leftBorder = (int) (0.2 * Game.GAME_WIDTH);
     private int rightBorder = (int) (0.8 * Game.GAME_WIDTH);
-    private int levelTilesWide = LoadSave.GetLevelData()[0].length;
-    private int maxTilesOffset = levelTilesWide - Game.WIDTH_IN_TILES;
-    private int maxLevelOffsetX = maxTilesOffset * Game.SIZE_IN_TILES;
+    private int maxLevelOffsetX;
 
     private BufferedImage playingBackgroundImage, bigCloudImage, smallCloudImage;
     private int[] smallCloudsYPosArray;
@@ -48,6 +48,8 @@ public class Playing extends State implements StateMethods {
         super(game);
         initClasses();
         initBackground();
+        calculateLevelOffset();
+        loadLevelStart();
     }
 
     /**
@@ -55,19 +57,35 @@ public class Playing extends State implements StateMethods {
      * This could be for a player, enemy, handler, etc.
      */
     private void initClasses() {
-        loadHandlers();
-        player = new Player(200, 200, (int) (64 * Game.SCALE), (int) (40 * Game.SCALE), this);
-        player.loadLevelData(levelHandler.getCurrentLevel().getLevelData());
-        pauseOverlay = new PauseOverlay(this);
-        gameOverScreen = new GameOverScreen(this);
+        initHandlers();
+        initPlayer();
+        initOverlays();
     }
 
     /**
-     * Loads the handlers of various classes.
+     * Initializes the handlers of various classes.
      */
-    private void loadHandlers() {
+    private void initHandlers() {
         levelHandler = new LevelHandler(game);
         enemyHandler = new EnemyHandler( this);
+    }
+
+    /**
+     * Initializes the player.
+     */
+    private void initPlayer() {
+        player = new Player(200, 200, (int) (64 * Game.SCALE), (int) (40 * Game.SCALE), this);
+        player.loadLevelData(levelHandler.getCurrentLevel().getLevelData());
+        player.setPlayerSpawnPoint(levelHandler.getCurrentLevel().getPlayerSpawnPoint());
+    }
+
+    /**
+     * Initializes the many overlays for UI.
+     */
+    private void initOverlays() {
+        pauseOverlay = new PauseOverlay(this);
+        gameOverScreen = new GameOverScreen(this);
+        levelCompletedOverlay = new LevelCompletedOverlay(this);
     }
 
     /**
@@ -98,18 +116,57 @@ public class Playing extends State implements StateMethods {
     }
 
     /**
+     * Calculates the current level's x-offset.
+     */
+    private void calculateLevelOffset() {
+        maxLevelOffsetX = levelHandler.getCurrentLevel().getMaxLevelOffsetX();
+    }
+
+    /**
+     * Load certain aspects at the start of the level.
+     */
+    private void loadLevelStart() {
+        enemyHandler.loadEnemies(levelHandler.getCurrentLevel());
+    }
+
+    /**
+     * Takes the player to the next level.
+     */
+    public void loadNextLevel() {
+        resetAll();
+        levelHandler.loadNextLevel();
+        player.setPlayerSpawnPoint(levelHandler.getCurrentLevel().getPlayerSpawnPoint());
+    }
+
+    /**
      * Updates any game related elements
      */
     @Override
     public void update() {
-        if (!paused && !gameOver) {
-            levelHandler.updateLevel();
-            player.updatePlayer();
-            enemyHandler.update(levelHandler.getCurrentLevel().getLevelData(), player);
-            checkBorderProximity();
-        } else {
+        if (paused) {
             pauseOverlay.update();
+        } else if (levelCompleted) {
+            levelCompletedOverlay.updateLevelCompletedButtons();
+        } else if (!gameOver){
+            updateGame();
         }
+    }
+
+    /**
+     * Update the game when not over or level is completed.
+     */
+    private void updateGame() {
+        levelHandler.updateLevel();
+        updateEntities();
+        checkBorderProximity();
+    }
+
+    /**
+     * Updates the player and enemies.
+     */
+    private void updateEntities() {
+        player.updatePlayer();
+        enemyHandler.updateEnemies(levelHandler.getCurrentLevel().getLevelData(), player);
     }
 
     /**
@@ -139,15 +196,14 @@ public class Playing extends State implements StateMethods {
     @Override
     public void draw(Graphics g) {
         drawPlayingBackGround(g);
-
-        levelHandler.drawLevel(g, xLevelOffset);
-        player.renderPlayer(g, xLevelOffset);
-        enemyHandler.drawEnemies(g, xLevelOffset);
+        drawGameElements(g);
 
         if (paused) {
             drawPauseOverlay(g);
         } else if (gameOver) {
             gameOverScreen.drawGameOverScreen(g);
+        } else if (levelCompleted) {
+            drawLevelCompletedOverlay(g);
         }
     }
 
@@ -158,6 +214,16 @@ public class Playing extends State implements StateMethods {
     private void drawPlayingBackGround(Graphics g) {
         g.drawImage(playingBackgroundImage, 0, 0, Game.GAME_WIDTH, Game.GAME_HEIGHT, null);
         drawClouds(g);
+    }
+
+    /**
+     * Draws the level, player, enemies, etc.
+     * @param g the Graphics object for drawing
+     */
+    private void drawGameElements(Graphics g) {
+        levelHandler.drawLevel(g, xLevelOffset);
+        player.renderPlayer(g, xLevelOffset);
+        enemyHandler.drawEnemies(g, xLevelOffset);
     }
 
     /**
@@ -219,6 +285,13 @@ public class Playing extends State implements StateMethods {
     }
 
     /**
+     * Draws the level completed screen when level finishes.
+     */
+    private void drawLevelCompletedOverlay(Graphics g) {
+        levelCompletedOverlay.drawLevelCompletedButtons(g);
+    }
+
+    /**
      * Resumes the game.
      */
     public void resumeGame() {
@@ -244,9 +317,9 @@ public class Playing extends State implements StateMethods {
      * Resets everything to its default values when restarting the game or returning to the main menu.
      */
     public void resetAll() {
-        // TODO: implement resetting all game-related values
         gameOver = false;
         paused = false;
+        levelCompleted = false;
         player.resetAll();
         enemyHandler.resetAllEnemies();
     }
@@ -273,6 +346,8 @@ public class Playing extends State implements StateMethods {
         if (!gameOver) {
             if (paused) {
                 pauseOverlay.mousePressed(e);
+            } else if (levelCompleted) {
+                levelCompletedOverlay.mousePressed(e);
             }
         }
     }
@@ -282,6 +357,8 @@ public class Playing extends State implements StateMethods {
         if (!gameOver) {
             if (paused) {
                 pauseOverlay.mouseReleased(e);
+            } else if (levelCompleted) {
+                levelCompletedOverlay.mouseReleased(e);
             }
         }
     }
@@ -291,6 +368,8 @@ public class Playing extends State implements StateMethods {
         if (!gameOver) {
             if (paused) {
                 pauseOverlay.mouseMoved(e);
+            } else if (levelCompleted) {
+                levelCompletedOverlay.mouseMoved(e);
             }
         }
 
@@ -335,5 +414,35 @@ public class Playing extends State implements StateMethods {
      */
     public Player getPlayer() {
         return player;
+    }
+
+    /**
+     * @return the enemy handler
+     */
+    public EnemyHandler getEnemyHandler() {
+        return enemyHandler;
+    }
+
+    /**
+     * @return the level handler
+     */
+    public LevelHandler getLevelHandler() {
+        return levelHandler;
+    }
+
+    /**
+     * Sets maxLevelOffsetX to a new value.
+     * @param xLevelOffset the new value for maxLevelOffsetX
+     */
+    public void setMaxLevelOffsetX(int xLevelOffset) {
+        this.maxLevelOffsetX = xLevelOffset;
+    }
+
+    /**
+     * Sets the level to be/not to be completed.
+     * @param levelCompleted true/false
+     */
+    public void setLevelCompleted(boolean levelCompleted) {
+        this.levelCompleted = levelCompleted;
     }
 }

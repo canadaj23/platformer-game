@@ -36,7 +36,14 @@ public class GamePanel extends JPanel {
     private void setPanelSize() {
         setPreferredSize(new Dimension(GAME_WIDTH, GAME_HEIGHT));
 
-        // for debugging
+        // For debugging
+//        displayGameDimensions();
+    }
+
+    /**
+     * Displays the width and height of the game.
+     */
+    private void displayGameDimensions() {
         System.out.println("Panel Size: " + GAME_WIDTH + " x " + GAME_HEIGHT);
     }
 

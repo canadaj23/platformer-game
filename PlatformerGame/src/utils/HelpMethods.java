@@ -1,13 +1,59 @@
 package utils;
 
+import entities.ManCrab;
 import main.Game;
 
+import java.awt.*;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+
+import static utils.Constants.Enemy.MAN_CRAB;
 
 /**
  * This class holds any methods useful for determining game logic, etc.
  */
 public class HelpMethods {
+
+    /**
+     * @return the level data for a given level
+     */
+    public static int[][] GetLevelData(BufferedImage levelImage) {
+        // getHeight and getWidth are for visible size, not necessarily the level size
+        int[][] levelData = new int[levelImage.getHeight()][levelImage.getWidth()];
+
+        for (int j = 0; j < levelImage.getHeight(); j++) {
+            for (int i = 0; i < levelImage.getWidth(); i++) {
+                Color color = new Color(levelImage.getRGB(i, j));
+                int value = color.getRed();
+                if (value >= 48) {
+                    value = 0;
+                }
+                levelData[j][i] = value;
+            }
+        }
+
+        return levelData;
+    }
+
+    /**
+     * @return an ArrayList with all the Man-Crab images
+     */
+    public static ArrayList<ManCrab> GetManCrabs(BufferedImage manCrabImage) {
+        ArrayList<ManCrab> manCrabArrayList = new ArrayList<>();
+
+        for (int j = 0; j < manCrabImage.getHeight(); j++) {
+            for (int i = 0; i < manCrabImage.getWidth(); i++) {
+                Color color = new Color(manCrabImage.getRGB(i, j));
+                int value = color.getGreen();
+                if (value == MAN_CRAB) {
+                    manCrabArrayList.add(new ManCrab(i * Game.SIZE_IN_TILES, j * Game.SIZE_IN_TILES));
+                }
+            }
+        }
+
+        return manCrabArrayList;
+    }
 
     /**
      *
@@ -110,15 +156,15 @@ public class HelpMethods {
      * </p>
      * The entity will change directions before reaching an edge.
      * <p>
-     * A better way to determine the outcome is to calculate for
-     * the bottom left and bottom right.
      * @param hitbox        the entity's hitbox
      * @param xSpeed        the entity's horizontal speed
      * @param levelData     the level data
-     * @return whether the tile the entity is on is the floor
+     * @return whether the tile the entity is on the floor
      */
     public static boolean IsFloorTile(Rectangle2D.Float hitbox, float xSpeed, int[][] levelData) {
-        return IsSolid(hitbox.x + xSpeed, hitbox.y + hitbox.height + 1, levelData);
+        return xSpeed > 0 ?
+                IsSolid(hitbox.x + hitbox.width + xSpeed, hitbox.y + hitbox.height + 1, levelData) :
+                IsSolid(hitbox.x + xSpeed, hitbox.y + hitbox.height + 1, levelData);
     }
 
     /**
@@ -161,5 +207,24 @@ public class HelpMethods {
         }
 
         return true;
+    }
+
+    /**
+     * Determines the spawn point of the player for a certain level.
+     * @param playerImage the image of the player
+     * @return a spawn point for the player for a certain level
+     */
+    public static Point GetPlayerSpawnPoint(BufferedImage playerImage) {
+        for (int j = 0; j < playerImage.getHeight(); j++) {
+            for (int i = 0; i < playerImage.getWidth(); i++) {
+                Color color = new Color(playerImage.getRGB(i, j));
+                int value = color.getGreen();
+                if (value == 100) {
+                    return new Point(i * Game.SIZE_IN_TILES, j * Game.SIZE_IN_TILES);
+                }
+            }
+        }
+
+        return new Point(Game.SIZE_IN_TILES, Game.SIZE_IN_TILES);
     }
 }
